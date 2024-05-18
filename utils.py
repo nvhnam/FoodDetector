@@ -88,7 +88,7 @@ def detect_image(conf, model, uploaded_file):
 
         if uploaded_file and st.button("Predict"):
             with st.spinner("Running..."):
-                detected_image = model.predict(uploaded_image, conf=conf, imgsz=640, save=True)
+                detected_image = model.predict(uploaded_image, conf=conf, imgsz=640)
                 # if detected_image:
                 #     detected_image.save("detected_image.jpg")
                 #     st.download_button(
