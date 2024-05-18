@@ -1,25 +1,38 @@
 import streamlit as st
 import time
 
-from utils import detect_image, detect_video, detect_webcam, download_predicted_image, load_model
+# from pages.sidebar import SideBar
+from utils import detect_image, detect_video, detect_webcam, load_model
+
+st.set_page_config(
+    page_title="FoodDetector",
+    page_icon=":pizza:"
+)
 
 with st.sidebar:
-    st.title(":hamburger: Menu")
-    st.divider()
-    st.page_link("pages/dataset.py", label="Dataset", icon="📦")
-    st.page_link("pages/dataset.py", label="About", icon="📃")
-    st.page_link("pages/dataset.py", label="Record", icon="🖇️")
-    st.divider()
-
-    confidence = float(st.slider(
-        "Model Confidence Score: ", 30, 100, 50 
-    ))/ 100
+        # st.title(":hamburger: Menu")
+        # st.divider()
+        # data_page = st.page_link("pages/Dataset.py", label="Dataset", icon="📦")
+        # about_page = st.page_link("pages/Dataset.py", label="About", icon="📃")
+        # record_page = st.page_link("pages/Dataset.py", label="Record", icon="🖇️")
+        st.header("Adjust the confident score :triangular_flag_on_post:")
+        confidence = float(st.slider(
+            label="",label_visibility="collapsed", min_value=30, max_value=100, value=50 
+        ))/ 100
+        st.subheader("Quick note :memo:")
+        st.markdown("Consideration for selecting the best suited confident score:")
+        st.markdown('''* **High confident score (>= 50%)**:  
+                    Set a higher threshold will make the model to predict with a higher accuracy detection but it will have a :green[low recall] as fewer object will be detected because of the :green[high precision] constraint.''')
+        st.markdown('''* **Low confident score (< 50%)**:  
+                    Set a lower threshold will enable the model to detect more object because of a :green[high recall] and a :green[low precision] constraint.''')
+        st.divider()
+        st.caption("Made by :blue[@nvhnam01]")
 
 with st.container():
     st.title("Welcome to _:green[FoodDetector]_ :pizza:")
     st.divider()
 
-    st.markdown('''FoodDetector use the _YOLOv8_ pretrained model for fine-tuning with the new food dataset which was collected and annotated.  
+    st.markdown('''FoodDetector use the _YOLOv8_ pretrained model for the hyperparameters fine-tuning with the new food dataset which was collected and annotated.  
                 It can be used to detect food from a picture, video, webcam and an IP camera.''')
     
     model = load_model()

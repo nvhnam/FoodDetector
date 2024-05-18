@@ -7,11 +7,14 @@ import tempfile
 import numpy as np
 from io import BytesIO
 
+import csv
+import datetime
+import os
 import io
 import base64
 import plotly.graph_objects as go
 
-def create_fig(image, detected=False):
+def create_fig(image, detected=False, save=False):
 
     if not isinstance(image, Image.Image):
         image = Image.fromarray(image)
@@ -76,52 +79,69 @@ def load_model():
 
     return model
 
+
 def detect_image(conf, model, uploaded_file):
     if uploaded_file is not None:
         boxes = None
         if uploaded_file:
             uploaded_image = Image.open(uploaded_file)
 
-            st.image(uploaded_image, output_format="JPEG")
+            st.image(uploaded_image, output_format="JPEG", use_column_width=False)
 
-            st.markdown("**Original Image**")
-
-        if uploaded_file and st.button("Predict"):
+            col1, col2 = st.columns([0.8, 0.2], gap="large")
+            with col1:
+                st.markdown("**Original Image**")
+            with col2:
+                predict_button = st.button("Predict", use_container_width=True, type="primary")
+        if uploaded_file and predict_button:
             with st.spinner("Running..."):
-                detected_image = model.predict(uploaded_image, conf=conf, imgsz=640)
-                # if detected_image:
-                #     detected_image.save("detected_image.jpg")
-                #     st.download_button(
-                #         label="Download Detected Image",
-                #         data=open("detected_image.jpg", "rb"),
-                #         file_name="detected_image.jpg",
-                #         mime="image/jpeg"
-                #     )
-
-                #     st.success("Detected image downloaded successfully!")
-                # else:
-                #     st.error("Failed to perform object detection.")
+                detected_image = model(uploaded_image, conf=conf, imgsz=640)
                 boxes = detected_image[0].boxes
 
             if boxes:
-                detected_img_arr = detected_image[0].plot()[:, :, ::-1]  
+                detected_img_arr_RGB = detected_image[0].plot()[:, :, ::1]  
+                detected_img_arr_BGR = detected_image[0].plot()[:, :, ::-1]  
 
-                fig_detected = create_fig(detected_img_arr, detected=True)
+                fig_detected = create_fig(detected_img_arr_BGR, detected=True, save=True)
                 st.plotly_chart(fig_detected, use_container_width=False)
-                st.markdown("**Predicted Image**")
 
+                current_time = datetime.datetime.now()
+                time_format = current_time.strftime("%d-%m-%Y_%H-%M")
+                
+                result_filename = os.path.join("runs/detect/images/", f"{time_format}.jpg")
+                cv2.imwrite(result_filename, detected_img_arr_RGB)
+                with open(result_filename, 'rb') as file:
+                    byte_im = file.read()
+
+                col1, col2 = st.columns([0.7, 0.3], gap="medium")
+                with col1:
+                    st.markdown("**Predicted Image**")
+                with col2:
+                    st.download_button(label="Download the image",
+                                       data=byte_im,
+                                       mime="image/jpg",
+                                       file_name=f"{time_format}.jpg")
+                    
                 detection_results = ""
                 count_dict = {}
+
+                food_names = []
+                confidences = []
+                counts = []
+
                 for box in boxes:
                     class_id = model.names[box.cls[0].item()]
-                    conf = round(box.conf[0].item(), 2)
+                    food_names.append(class_id)
+                    conf = int(round(box.conf[0].item(), 2)*100)
+                    confidences.append(conf)
 
-                    detection_results += f"<b style='color: cyan;'>Food name:</b> {class_id}<br><b style='color: cyan;'>Confidence:</b> {int(conf*100)}%<br>---<br>"
+                    detection_results += f"<b style='color: cyan;'>Food name:</b> {class_id}<br><b style='color: cyan;'>Confidence:</b> {conf}%<br>---<br>"
                     if class_id in count_dict:
                         count_dict[class_id] += 1
                     else:
                         count_dict[class_id] = 1
                 for object_type, count in count_dict.items():
+                    counts.append(count)
                     detection_results += f"<b style='color: cyan;'>Count of {object_type}:</b> {count}<br>"
 
                 scrollable_textbox = f"""
@@ -140,6 +160,14 @@ def detect_image(conf, model, uploaded_file):
                 st.markdown("""### Results:""")
                 st.markdown(scrollable_textbox, unsafe_allow_html=True)
 
+                rows = zip(food_names, confidences, counts)
+
+                csv_filename = os.path.join("runs/detect/texts/", f"{time_format}.csv")
+                with open(csv_filename, mode='w', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(["Food Name(s)", "Confidence(%)", "Count"])
+                    writer.writerows(rows)
+
             else:
                 st.markdown("""### No food detected""")
                 st.markdown("""
@@ -147,19 +175,6 @@ def detect_image(conf, model, uploaded_file):
                     Please try with a different image or adjust the model's 
                     confidence threshold in the sidebar and try again.
                 """)
-
-def download_predicted_image(predicted_image):
-    predicted_image_bytes = BytesIO()
-    predicted_image.save(predicted_image_bytes, format="PNG")
-    predicted_image_bytes.seek(0)
-    
-    st.download_button(
-        label = "Download Predicted Image",
-        data = predicted_image_bytes,
-        file_name="predicted_image.png",
-        mime="image/png"
-    )
-
 
 def detect_video(conf, model, uploaded_file):
     if uploaded_file is not None:
