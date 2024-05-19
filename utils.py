@@ -75,7 +75,7 @@ def _display_detected_frames(conf, model, st_frame, image, rtsp=False):
 @st.cache_resource
 def load_model():
     # modelpath = r"./model/YOLOv8m_1.pt"
-    modelpath = r"model/YOLOv8s_1_new_VN_SGD_tuned.pt"
+    modelpath = r"./model/YOLOv8s_1_new_VN_SGD_tuned.pt"
     model = YOLO(modelpath)
 
     return model
