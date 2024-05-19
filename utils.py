@@ -14,7 +14,7 @@ import io
 import base64
 import plotly.graph_objects as go
 
-def create_fig(image, detected=False, save=False):
+def create_fig(image, detected=False):
 
     if not isinstance(image, Image.Image):
         image = Image.fromarray(image)
@@ -80,6 +80,8 @@ def load_model():
 
     return model
 
+def resize_image(image):
+    return image.resize((640, 640))
 
 def detect_image(conf, model, uploaded_file):
     if uploaded_file is not None:
@@ -87,7 +89,9 @@ def detect_image(conf, model, uploaded_file):
         if uploaded_file:
             uploaded_image = Image.open(uploaded_file)
 
-            st.image(uploaded_image, output_format="JPEG", use_column_width=False)
+            resized_uploaded_image = resize_image(uploaded_image)
+
+            st.image(resized_uploaded_image, output_format="JPEG", use_column_width=False)
 
             col1, col2 = st.columns([0.8, 0.2], gap="large")
             with col1:
@@ -96,15 +100,15 @@ def detect_image(conf, model, uploaded_file):
                 predict_button = st.button("Predict", use_container_width=True, type="primary")
         if uploaded_file and predict_button:
             with st.spinner("Running..."):
-                detected_image = model(uploaded_image, conf=conf, imgsz=640)
+                detected_image = model(resized_uploaded_image, conf=conf, imgsz=640)
                 boxes = detected_image[0].boxes
 
             if boxes:
                 detected_img_arr_RGB = detected_image[0].plot()[:, :, ::1]  
                 detected_img_arr_BGR = detected_image[0].plot()[:, :, ::-1]  
 
-                fig_detected = create_fig(detected_img_arr_BGR, detected=True, save=True)
-                st.plotly_chart(fig_detected, use_container_width=False)
+                fig_detected = create_fig(detected_img_arr_BGR, detected=True)
+                st.plotly_chart(fig_detected, use_container_width=True)
 
                 current_time = datetime.datetime.now()
                 time_format = current_time.strftime("%d-%m-%Y_%H-%M")
