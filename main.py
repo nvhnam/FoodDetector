@@ -10,11 +10,6 @@ st.set_page_config(
 )
 
 with st.sidebar:
-        # st.title(":hamburger: Menu")
-        # st.divider()
-        # data_page = st.page_link("pages/Dataset.py", label="Dataset", icon="📦")
-        # about_page = st.page_link("pages/Dataset.py", label="About", icon="📃")
-        # record_page = st.page_link("pages/Dataset.py", label="Record", icon="🖇️")
         st.header("Adjust the confident score :triangular_flag_on_post:")
         confidence = float(st.slider(
             label="",label_visibility="collapsed", min_value=30, max_value=100, value=50 
@@ -24,7 +19,7 @@ with st.sidebar:
         st.markdown('''* **High confident score (>= 50%)**:  
                     Set a higher threshold will make the model to predict with a higher accuracy detection but it will have a :green[low recall] as fewer object will be detected because of the :green[high precision] constraint.''')
         st.markdown('''* **Low confident score (< 50%)**:  
-                    Set a lower threshold will enable the model to detect more object because of a :green[high recall] and a :green[low precision] constraint.''')
+                    Set a lower threshold will enable the model to detect more object - :green[high recall] because of the :green[low precision] constraint.''')
         st.divider()
         st.caption("Made by :blue[@nvhnam01]")
 
