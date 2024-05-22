@@ -312,9 +312,6 @@ def detect_webcam(conf, model, address="", rtsp=False):
             if success:
                 mirrored_frame = cv2.flip(image, 1)            
                 _display_detected_frames(conf, model, st_frame, mirrored_frame, rtsp=rtsp, youtube_url="")
-                cv2.imshow('YOLOv8 Webcam', image)
-                if cv2.waitKey(1) == ord('q'): 
-                    break
             else:
                 break
         # vid_cap.release()
