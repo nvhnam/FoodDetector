@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 
-from utils import _display_detected_frames, detect_image, detect_video, detect_webcam, display_clip, load_model
+from utils import _display_detected_frame, detect_image, detect_video, detect_webcam, load_model
 
 st.set_page_config(
     page_title="FoodDetector",
@@ -61,20 +61,19 @@ with st.container():
     with tab2:
         st.header("Video Upload :movie_camera:")
         uploaded_clip = st.file_uploader("Choose a clip", accept_multiple_files=False, type=['mp4'])
-        # video=st.empty()
         if uploaded_clip:
-            display_clip(confidence=confidence, model=model, uploaded_clip=uploaded_clip)
+            detect_video(conf=confidence, model=model, uploaded_file=uploaded_clip, youtube_url="")
 
         st.subheader("Enter YouTube URL :tv:")
-        tube=st.empty()
+        tube = st.empty()
         with st.form("youtube_form"):
             col1, col2 = st.columns([0.8, 0.2], gap="medium")
             with col1:
                 youtube_url = st.text_input("", label_visibility="collapsed", placeholder="https://youtu.be/LNwODJXcvt4")
             with col2:
                 submitted = st.form_submit_button("Predict", use_container_width=True)
-            if submitted and youtube_url:            
-               _display_detected_frames(conf=confidence, model=model, st_frame=tube, youtube_url=youtube_url, image=None)
+        if submitted and youtube_url:            
+            _display_detected_frame(conf=confidence, model=model, st_frame=tube, youtube_url=youtube_url)
 
     with tab3:
         st.header("Webcam :camera:")

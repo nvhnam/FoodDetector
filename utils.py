@@ -15,6 +15,7 @@ import os
 import io
 import base64
 import plotly.graph_objects as go
+import pandas as pd
 
 def create_fig(image, detected=False):
 
@@ -61,63 +62,183 @@ def create_fig(image, detected=False):
     return fig
 
 def extract_shorts_id(url):
-    is_youtube_short =  re.search(r'(?:youtube\.com/shorts/|youtu\.be/)([a-zA-Z0-9_-]+)', url)
-    if is_youtube_short:
-        return is_youtube_short.group(1)
+    match  =  re.search(r"(?:https?://)?(?:www\.)?(?:youtube\.com/(?:shorts/|watch\?v=|embed/)|youtu\.be/)([\w\-]{11})", url)
+    if match :
+        return match.group(1)
     return None
 
-def _display_detected_frames(conf, model, st_frame, image, youtube_url, rtsp=False):
-    if rtsp:
-        res = model(source=image, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
-    else:
+def _display_detected_frame(conf, model, st_frame, youtube_url):
+    if youtube_url:
         youtube_id = extract_shorts_id(url=youtube_url)
         if youtube_id and youtube_url:
             valid_url = f"https://www.youtube.com/watch?v={youtube_id}"
-            res = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu")
-            for i, r in enumerate(res):
-                im_bgr = r.plot() 
-                im_rgb = Image.fromarray(im_bgr[..., ::-1])  
-                im_rgb_resized = im_rgb.resize((640, 640))          
-            st_frame.image(im_rgb_resized, caption='Predicted Video', use_column_width=True)  
-        else: 
-            res = model(source=image, stream_buffer=True, stream=True, vid_stride=7280, conf=conf, imgsz=640, save=True, device="cpu")
+
+            results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu")
+
+            food_names1 = []
+            confidences1 = []
             current_time = datetime.datetime.now()
             time_format = current_time.strftime("%d-%m-%Y_%H-%M")
-            for i, r in enumerate(res):
-                im_bgr = r.plot() 
-                im_rgb = Image.fromarray(im_bgr[..., ::-1]) 
-                im_rgb_resized = im_rgb.resize((640,640), reducing_gap=1.0)
-                r.save(filename=f"runs/detect/videos/{time_format}.jpg") 
-            st_frame.image(im_rgb_resized, caption='Predicted Video', use_column_width=True)
-            # pass
+            csv_filename = os.path.join("runs/detect/texts/", f"{time_format}.csv")
+            os.makedirs("runs/detect/texts/", exist_ok=True)
 
-def display_clip(uploaded_clip, confidence, model):
-    if uploaded_clip:
-        # youtube_id = extract_shorts_id(video_url)
-        # if youtube_id:
-        #     video_url = f"https://www.youtube.com/watch?v={youtube_id}"
-        # print(video_url)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
-            temp_file.write(uploaded_clip.read())
-            temp_file_path = temp_file.name
-        cap = cv2.VideoCapture(temp_file_path)
-        if not cap.isOpened():
-            st.error("Error opening video stream or file")
-            return
-        # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  
-        # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)  
-        # cap.set(cv2.CAP_PROP_FPS, 60)
-        try: 
-            st_frame = st.empty()
-            while True:
-                success, frame = cap.read()
-                if success:             
-                    _display_detected_frames(confidence, model, st_frame, frame, youtube_url="")
-                else:
+            stop_button = st.button("Stop")
+            stop_pressed = False
+
+            for r in results:
+                for pred in r.boxes: 
+                    food_name = model.names[pred.cls[0].item()]
+                    food_names1.append(food_name)
+                    confidence = int(round(pred.conf[0].item(), 2)*100)
+                    confidences1.append(confidence)
+                im_bgr = r.plot() 
+                im_rgb = Image.fromarray(im_bgr[..., ::-1])  
+                # im_rgb_resized = im_rgb.resize((640, 640))         
+                st_frame.image(im_rgb, caption='Predicted Video', use_column_width=True)
+
+                if stop_button:
+                    stop_pressed = True
+                    stop_button = None
                     break
-            cap.release()
-        except Exception as e:
-            st.error(f"Error loading video: {str(e)}")
+
+            rows = zip(food_names1, confidences1)
+            with open(csv_filename, mode='w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(["Food Name(s)", "Confidence(%)"])
+                writer.writerows(rows)  
+            
+            st.success("Prediction completed. Results saved to CSV.")
+            st.download_button(label="Download Predictions CSV", data=open(csv_filename, 'rb').read(), file_name=f"{time_format}.csv")
+
+
+# def detect_from_file(conf, model, video_file, output_file):
+    # if uploaded_clip:
+    #     # youtube_id = extract_shorts_id(video_url)
+    #     # if youtube_id:
+    #     #     video_url = f"https://www.youtube.com/watch?v={youtube_id}"
+    #     # print(video_url)
+    #     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
+    #         temp_file.write(uploaded_clip.read())
+    #         temp_file_path = temp_file.name
+    #     cap = cv2.VideoCapture(temp_file_path)
+    #     if not cap.isOpened():
+    #         st.error("Error opening video stream or file")
+    #         return
+    #     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  
+    #     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)  
+    #     # cap.set(cv2.CAP_PROP_FPS, 60)
+    #     try: 
+    #         st_frame = st.empty()
+    #         while True:
+    #             success, frame = cap.read()
+    #             if success:             
+    #                 _display_detected_frames(confidence, model, st_frame, frame, youtube_url="")
+    #             else:
+    #                 break
+    #         cap.release()
+    #     except Exception as e:
+    #         st.error(f"Error loading video: {str(e)}")
+
+def detect_from_file(conf, model, video_file, video_url, output_file, csv_file):
+    if video_file:
+        cap = cv2.VideoCapture(video_file)
+    else: 
+        cap = cv2.VideoCapture(video_url)
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    
+    out = cv2.VideoWriter(output_file, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
+
+    st_frame = st.empty()
+    progress_bar = st.progress(0)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    food_names1 = []
+    confidences1 = []
+    frames1 = []
+    stop_button = st.button("Stop")
+    stop_pressed = False
+
+    frame_num = 0 
+    while True:
+        ret, frame = cap.read()
+        if not ret or stop_pressed:
+            break
+        results = model(source=frame, stream=True, conf=conf, imgsz=640, save=False, device="cpu")
+        for r in results:
+            for pred in r.boxes: 
+                food_name = model.names[pred.cls[0].item()]
+                food_names1.append(food_name)
+                confidence = int(round(pred.conf[0].item(), 2)*100)
+                confidences1.append(confidence)
+
+            im_bgr = r.plot() 
+            im_rgb = Image.fromarray(im_bgr[..., ::-1])
+            st_frame.image(im_rgb, caption='Predicted Video', use_column_width=True)
+            out.write(im_bgr) 
+            progress_bar.progress((frame_num + 1) / total_frames)
+            frame_num += 1
+            frames1.append(frame_num)
+        if stop_button:
+            stop_pressed = True
+            stop_button = None
+            break
+
+    cap.release()
+    out.release()
+
+    rows = zip(frames1, food_names1, confidences1)
+    with open(csv_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Frame", "Food Name(s)", "Confidence(%)"])
+        writer.writerows(rows)
+
+def detect_video(conf, model, uploaded_file, youtube_url):
+    if youtube_url:
+        video_id = extract_shorts_id(youtube_url)
+        if video_id:
+            video_url = f"https://www.youtube.com/watch?v={video_id}"
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_input_file:
+                temp_input_file_path = temp_input_file.name
+
+            videos_output_dir = 'runs/detect/videos/'
+            csv_output_dir = 'runs/detect/texts/'
+            os.makedirs(videos_output_dir, exist_ok=True)
+            os.makedirs(csv_output_dir, exist_ok=True)
+            current_time = datetime.datetime.now()
+            timestamp = current_time.strftime("%d-%m-%Y_%H-%M")
+            output_video_file = os.path.join(videos_output_dir, f'{timestamp}.mp4')
+            output_csv_file = os.path.join(csv_output_dir, f'{timestamp}.csv')
+
+            detect_from_file(conf=conf, model=model, video_url=video_url, video_file=None, output_file=output_video_file, csv_file=output_csv_file)
+    elif uploaded_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_input_file:
+            temp_input_file.write(uploaded_file.read())
+            temp_input_file_path = temp_input_file.name
+        
+        videos_output_dir = 'runs/detect/videos/'
+        csv_output_dir = 'runs/detect/texts/'
+        os.makedirs(videos_output_dir, exist_ok=True)
+        os.makedirs(csv_output_dir, exist_ok=True)
+        current_time = datetime.datetime.now()
+        timestamp = current_time.strftime("%d-%m-%Y_%H-%M")
+        output_video_file = os.path.join(videos_output_dir, f'{timestamp}.mp4')
+        output_csv_file = os.path.join(csv_output_dir, f'{timestamp}.csv')
+
+        detect_from_file(conf=conf, model=model, video_url="", video_file=temp_input_file_path, output_file=output_video_file, csv_file=output_csv_file)
+
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
+        with open(output_video_file, 'rb') as f:
+            st.download_button('Download Processed Video', f, file_name=f'{timestamp}.mp4', use_container_width=True)        
+    with col2:
+        with open(output_csv_file, 'rb') as f:
+            st.download_button('Download Predictions CSV', f, file_name=f'{timestamp}.csv', use_container_width=True)
+    st.divider()
+
+
+
 
 @st.cache_resource
 def load_model():
@@ -149,18 +270,9 @@ def detect_image_result(detected_image, model):
         with open(result_filename, 'rb') as file:
             byte_im = file.read()
 
-        col1, col2 = st.columns([0.7, 0.3], gap="medium")
-        with col1:
-            st.markdown("**Predicted Image**")
-        with col2:
-            st.download_button(label="Download the image",
-                                data=byte_im,
-                                mime="image/jpg",
-                                file_name=f"{time_format}.jpg")
-            
+        st.markdown("**Predicted Image**")
         detection_results = ""
         count_dict = {}
-
         food_names = []
         confidences = []
         counts = []
@@ -204,6 +316,17 @@ def detect_image_result(detected_image, model):
             writer.writerow(["Food Name(s)", "Confidence(%)", "Count"])
             writer.writerows(rows)
 
+        col1, col2 = st.columns(2, gap="large")
+        with col1:    
+            st.download_button(label="Download Predicted Image",
+                                    data=byte_im,
+                                    mime="image/jpg",
+                                    file_name=f"{time_format}.jpg", 
+                                    use_container_width=True)
+        with col2: 
+            st.download_button(label="Download Predictions CSV", data=open(csv_filename, 'rb').read(), file_name=f"{time_format}.csv", use_container_width=True)
+        st.divider()
+
     else:
         st.markdown("""### No food detected""")
         st.markdown("""
@@ -240,57 +363,57 @@ def detect_image(conf, model, uploaded_file, url=False):
                 detected_image = model(resized_uploaded_image, conf=conf, imgsz=640)
                 detect_image_result(detected_image, model)
 
-def detect_video(conf, model, uploaded_file):
-    if uploaded_file is not None:
-        tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-        tfile.write(uploaded_file.read())
-        tfile.close()
+# def detect_video(conf, model, uploaded_file):
+#     if uploaded_file is not None:
+#         tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+#         tfile.write(uploaded_file.read())
+#         tfile.close()
 
-        execution_button = st.button("Predict", key="predict_button")
+#         execution_button = st.button("Predict", key="predict_button")
 
-        if 'execution_completed' not in st.session_state:
-            st.session_state['execution_completed'] = False
+#         if 'execution_completed' not in st.session_state:
+#             st.session_state['execution_completed'] = False
 
-        if 'play_button_clicked' not in st.session_state:
-            st.session_state['play_button_clicked'] = False
+#         if 'play_button_clicked' not in st.session_state:
+#             st.session_state['play_button_clicked'] = False
 
-        st_frame = st.empty()  
-        temp_output_file = None  
+#         st_frame = st.empty()  
+#         temp_output_file = None  
 
-        if execution_button:  
-            with st.spinner("FoodDetector is predicting..."):
-                temp_output_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+#         if execution_button:  
+#             with st.spinner("FoodDetector is predicting..."):
+#                 temp_output_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
 
-                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-                vid_cap = cv2.VideoCapture(tfile.name)
-                frame_width, frame_height = int(vid_cap.get(3)), int(vid_cap.get(4))
-                out = cv2.VideoWriter(temp_output_file.name, fourcc, vid_cap.get(cv2.CAP_PROP_FPS), (frame_width, frame_height))
+#                 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+#                 vid_cap = cv2.VideoCapture(tfile.name)
+#                 frame_width, frame_height = int(vid_cap.get(3)), int(vid_cap.get(4))
+#                 out = cv2.VideoWriter(temp_output_file.name, fourcc, vid_cap.get(cv2.CAP_PROP_FPS), (frame_width, frame_height))
 
-                progress_bar = st.progress(0)
+#                 progress_bar = st.progress(0)
                     
-                frame_rate = vid_cap.get(cv2.CAP_PROP_FPS)
-                st.info(f"This video frame rate: {frame_rate} FPS")  
+#                 frame_rate = vid_cap.get(cv2.CAP_PROP_FPS)
+#                 st.info(f"This video frame rate: {frame_rate} FPS")  
 
-                total_frames = int(vid_cap.get(cv2.CAP_PROP_FRAME_COUNT))
+#                 total_frames = int(vid_cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-                for frame_num in range(total_frames):
-                    success, image = vid_cap.read()
-                    if success:
-                        if frame_num % 15 == 0:
-                            processed_frame = _display_detected_frames(conf, model, st_frame, image, youtube_url="")
-                            out.write(processed_frame)
-                        progress_bar.progress((frame_num + 1) / total_frames)
-                    else:
-                        break
+#                 for frame_num in range(total_frames):
+#                     success, image = vid_cap.read()
+#                     if success:
+#                         if frame_num % 15 == 0:
+#                             processed_frame = _display_detected_frames(conf, model, st_frame, image, youtube_url="")
+#                             out.write(processed_frame)
+#                         progress_bar.progress((frame_num + 1) / total_frames)
+#                     else:
+#                         break
 
-                processed_frames_info = f"Total Frames: {total_frames}"
-                st.info(processed_frames_info) 
+#                 processed_frames_info = f"Total Frames: {total_frames}"
+#                 st.info(processed_frames_info) 
 
-                out.release()  
-                vid_cap.release()  
+#                 out.release()  
+#                 vid_cap.release()  
 
-                st.success('Execution complete!')
-                st.session_state['execution_completed'] = True
+#                 st.success('Execution complete!')
+#                 st.session_state['execution_completed'] = True
 
                 
 
@@ -311,7 +434,7 @@ def detect_webcam(conf, model, address="", rtsp=False):
             success, image = vid_cap.read()
             if success:
                 mirrored_frame = cv2.flip(image, 1)            
-                _display_detected_frames(conf, model, st_frame, mirrored_frame, rtsp=rtsp, youtube_url="")
+                model(source=mirrored_frame, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
             else:
                 break
         # vid_cap.release()
