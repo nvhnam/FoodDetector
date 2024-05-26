@@ -157,8 +157,14 @@ def detect_from_file(conf, model, video_file, video_url, output_file, csv_file):
     food_names1 = []
     confidences1 = []
     frames1 = []
-    stop_button = st.button("Stop")
-    stop_pressed = False
+    col1, col2, col3 = st.columns(3, gap="large")
+    with col1:
+        st.empty()
+    with col2:
+        st.empty()
+    with col3:
+        stop_button = st.button("Stop", use_container_width=True)
+        stop_pressed = False
 
     frame_num = 0 
     while True:
@@ -175,7 +181,7 @@ def detect_from_file(conf, model, video_file, video_url, output_file, csv_file):
 
             im_bgr = r.plot() 
             im_rgb = Image.fromarray(im_bgr[..., ::-1])
-            st_frame.image(im_rgb, caption='Predicted Video', use_column_width=True)
+            st_frame.image(im_rgb, caption='Predicted video', use_column_width=True)
             out.write(im_bgr) 
             progress_bar.progress((frame_num + 1) / total_frames)
             frame_num += 1
@@ -245,6 +251,8 @@ def load_model():
     # modelpath = r"./model/YOLOv8m_1.pt"
     # modelpath = r"./model/YOLOv8s_1_new_VN_SGD_tuned.pt"
     modelpath = r"./model/YOLOv8s_2_new_VN_SGD_YOLO_tuned.pt"
+    # modelpath = r"./model/YOLOv10s_1_new_VN_2_SGD_YOLO_tune.pt"
+    # modelpath = r"./model/YOLO8m_1_new_VN_Augm_SGD_YOLO_tuned.pt"
     model = YOLO(modelpath)
 
     return model
@@ -346,7 +354,7 @@ def detect_image(conf, model, uploaded_file, url=False):
             uploaded_image = Image.open(BytesIO(response.content))
 
         resized_uploaded_image = resize_image(uploaded_image)
-        st.image(resized_uploaded_image, output_format="JPEG", use_column_width=False)
+        st.image(uploaded_image, output_format="JPEG", use_column_width=False)
 
         col1, col2 = st.columns([0.8, 0.2], gap="large")
         with col1:
@@ -430,11 +438,27 @@ def detect_webcam(conf, model, address="", rtsp=False):
 
     try: 
         st_frame = st.empty()
+        col1, col2, col3 = st.columns(3, gap="large")
+        with col1:
+            st.empty()
+        with col2:
+            stop_button = st.button("Stop", use_container_width=True)
+            stop_pressed = False
+        with col3:
+            st.empty()
         while True:
             success, image = vid_cap.read()
             if success:
                 mirrored_frame = cv2.flip(image, 1)            
-                model(source=mirrored_frame, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
+                results = model(source=mirrored_frame, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
+                for r in results:
+                    im_bgr = r.plot() 
+                    im_rgb = Image.fromarray(im_bgr[..., ::-1])
+                    st_frame.image(im_rgb, caption='Webcam', use_column_width=True)
+                if stop_button:
+                    stop_pressed = True
+                    stop_button = None
+                    break
             else:
                 break
         # vid_cap.release()

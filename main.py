@@ -79,7 +79,7 @@ with st.container():
         st.header("Webcam :camera:")
         show_section = st.checkbox(":point_left: Toggle to open the webcam")
         if show_section:
-            detect_webcam(confidence, model)
+            detect_webcam(confidence, model, rtsp=False)
 
     with tab4:
         st.header("IP Camera :video_camera:")
