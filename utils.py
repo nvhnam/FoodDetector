@@ -253,6 +253,8 @@ def load_model():
     modelpath = r"./model/YOLOv8s_2_new_VN_SGD_YOLO_tuned.pt"
     # modelpath = r"./model/YOLOv10s_1_new_VN_2_SGD_YOLO_tune.pt"
     # modelpath = r"./model/YOLO8m_1_new_VN_Augm_SGD_YOLO_tuned.pt"
+    # modelpath = r"./model/YOLOv8s_modified_new_VN_2_Augm_SGD.pt"
+    # modelpath = r"./model/YOLO8n_modified.pt"
     model = YOLO(modelpath)
 
     return model
@@ -354,7 +356,7 @@ def detect_image(conf, model, uploaded_file, url=False):
             uploaded_image = Image.open(BytesIO(response.content))
 
         resized_uploaded_image = resize_image(uploaded_image)
-        st.image(uploaded_image, output_format="JPEG", use_column_width=False)
+        st.image(resized_uploaded_image, output_format="JPEG", use_column_width=False)
 
         col1, col2 = st.columns([0.8, 0.2], gap="large")
         with col1:
