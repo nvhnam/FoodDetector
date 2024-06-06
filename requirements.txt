@@ -6,3 +6,5 @@ numpy
 plotly
 dill
 pytube
+huggingface-hub
+git+https://github.com/THU-MIG/yolov10.git

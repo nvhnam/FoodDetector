@@ -1,4 +1,4 @@
-from ultralytics import YOLO
+from ultralytics import YOLOv10
 import streamlit as st
 import cv2
 from PIL import Image
@@ -62,12 +62,12 @@ def create_fig(image, detected=False):
     return fig
 
 def extract_shorts_id(url):
-    match  =  re.search(r"(?:https?://)?(?:www\.)?(?:youtube\.com/(?:shorts/|watch\?v=|embed/)|youtu\.be/)([\w\-]{11})", url)
+    match = re.search(r"(?:https?://)?(?:www\.)?(?:youtube\.com/(?:shorts/|watch\?v=|embed/|.*[&?]v=)|youtu\.be/)([\w\-]{11})", url)
     if match :
         return match.group(1)
     return None
 
-def _display_detected_frame(conf, model, st_frame, youtube_url):
+def _display_detected_frame(conf, model, st_frame, youtube_url=""):
     if youtube_url:
         youtube_id = extract_shorts_id(url=youtube_url)
         if youtube_id and youtube_url:
@@ -243,19 +243,20 @@ def detect_video(conf, model, uploaded_file, youtube_url):
             st.download_button('Download Predictions CSV', f, file_name=f'{timestamp}.csv', use_container_width=True)
     st.divider()
 
-
-
-
 @st.cache_resource
 def load_model():
     # modelpath = r"./model/YOLOv8m_1.pt"
     # modelpath = r"./model/YOLOv8s_1_new_VN_SGD_tuned.pt"
-    modelpath = r"./model/YOLOv8s_2_new_VN_SGD_YOLO_tuned.pt"
+    # modelpath = r"./model/YOLOv8s_2_new_VN_SGD_YOLO_tuned.pt"
+    # modelpath = r"./model/YOLOv10s_new_VN_3_SGD.onnx"
+    modelpath = r"./model/yolov10/YOLOv10s_new_VN_3_SGD.pt"
     # modelpath = r"./model/YOLOv10s_1_new_VN_2_SGD_YOLO_tune.pt"
     # modelpath = r"./model/YOLO8m_1_new_VN_Augm_SGD_YOLO_tuned.pt"
     # modelpath = r"./model/YOLOv8s_modified_new_VN_2_Augm_SGD.pt"
     # modelpath = r"./model/YOLO8n_modified.pt"
-    model = YOLO(modelpath)
+    model = YOLOv10(modelpath)
+
+    # model = load_onnx_model()
 
     return model
 

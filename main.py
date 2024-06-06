@@ -39,6 +39,8 @@ with st.container():
 
         if uploaded_file:
             detect_image(confidence, model, uploaded_file)
+            
+            # detections = detect_image_onnx(model, uploaded_file, confidence)
 
         st.subheader("Enter a picture URL 	:link:")
         with st.form("picture_form"):
@@ -64,16 +66,17 @@ with st.container():
         if uploaded_clip:
             detect_video(conf=confidence, model=model, uploaded_file=uploaded_clip, youtube_url="")
 
-        st.subheader("Enter YouTube URL :tv:")
-        tube = st.empty()
-        with st.form("youtube_form"):
-            col1, col2 = st.columns([0.8, 0.2], gap="medium")
-            with col1:
-                youtube_url = st.text_input("", label_visibility="collapsed", placeholder="https://youtu.be/LNwODJXcvt4")
-            with col2:
-                submitted = st.form_submit_button("Predict", use_container_width=True)
-        if submitted and youtube_url:            
-            _display_detected_frame(conf=confidence, model=model, st_frame=tube, youtube_url=youtube_url)
+        else: 
+            st.subheader("Enter YouTube URL :tv:")
+            tube = st.empty()
+            with st.form("youtube_form"):
+                col1, col2 = st.columns([0.8, 0.2], gap="medium")
+                with col1:
+                    youtube_url = st.text_input("", label_visibility="collapsed", placeholder="https://youtu.be/LNwODJXcvt4")
+                with col2:
+                    submitted = st.form_submit_button("Predict", use_container_width=True)
+            if submitted and youtube_url:            
+                _display_detected_frame(conf=confidence, model=model, st_frame=tube, youtube_url=youtube_url)
 
     with tab3:
         st.header("Webcam :camera:")
