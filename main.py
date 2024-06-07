@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 
-from utils import _display_detected_frame, detect_image, detect_video, detect_webcam, load_model
+from utils import _display_detected_frame, detect_camera, detect_image, detect_video, detect_webcam, load_model
 
 st.set_page_config(
     page_title="FoodDetector",
@@ -80,9 +80,9 @@ with st.container():
 
     with tab3:
         st.header("Webcam :camera:")
-        show_section = st.checkbox(":point_left: Toggle to open the webcam")
-        if show_section:
-            detect_webcam(confidence, model, rtsp=False)
+        # show_section = st.checkbox(":point_left: Toggle to open the webcam")
+        # if show_section:
+        detect_webcam(confidence, model)
 
     with tab4:
         st.header("IP Camera :video_camera:")
@@ -103,9 +103,9 @@ with st.container():
                     if address:
                         with st.spinner("Loading..."):
                             time.sleep(2)
-                        detect_webcam(confidence, model, address=address, rtsp=True)
+                        detect_camera(confidence, model, address=address, rtsp=True)
                     else:
                         st.error("Please enter a valid RTSP camera URL")
                 if cancel:
                     if address:
-                        detect_webcam(confidence, model, address)
+                        detect_camera(confidence, model, address)

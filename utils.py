@@ -1,8 +1,10 @@
+import av
 from ultralytics import YOLOv10
 import streamlit as st
 import cv2
 from PIL import Image
 import tempfile
+from streamlit_webrtc import VideoProcessorBase, WebRtcMode, webrtc_streamer, VideoTransformerBase
 
 import numpy as np
 from io import BytesIO
@@ -250,11 +252,15 @@ def load_model():
     # modelpath = r"./model/YOLOv8s_2_new_VN_SGD_YOLO_tuned.pt"
     # modelpath = r"./model/YOLOv10s_new_VN_3_SGD.onnx"
     # modelpath = r"./model/yolov10/YOLOv10s_new_VN_3_SGD.pt"
+
     modelpath = r"./model/yolov10/YOLOv10m_new_VN_3_SGD.pt"
+
     # modelpath = r"./model/YOLOv10s_1_new_VN_2_SGD_YOLO_tune.pt"
     # modelpath = r"./model/YOLO8m_1_new_VN_Augm_SGD_YOLO_tuned.pt"
     # modelpath = r"./model/YOLOv8s_modified_new_VN_2_Augm_SGD.pt"
     # modelpath = r"./model/YOLO8n_modified.pt"
+    # model = YOLOv10.from_pretrained("ThomasNg/FoodDetector")
+
     model = YOLOv10(modelpath)
 
     # model = load_onnx_model()
@@ -429,13 +435,8 @@ def detect_image(conf, model, uploaded_file, url=False):
 
                 
 
-def detect_webcam(conf, model, address="", rtsp=False):
-    if rtsp:
-        vid_cap = cv2.VideoCapture('rtsp://admin:' + address)
-        # vid_cap = cv2.VideoCapture('http://:' + address)
-    else: 
-        vid_cap = cv2.VideoCapture(0)
-    
+def detect_camera(conf, model, address):
+    vid_cap = cv2.VideoCapture('rtsp://admin:' + address)
     vid_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  
     vid_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)  
     vid_cap.set(cv2.CAP_PROP_FPS, 4)
@@ -470,3 +471,30 @@ def detect_webcam(conf, model, address="", rtsp=False):
         st.error(f"Error loading video: {str(e)}")
     finally:
         vid_cap.release()
+
+
+class VideoTransformer(VideoProcessorBase):
+    def __init__(self, conf, model):
+        self.conf = conf
+        self.model = model
+
+    def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
+        img = frame.to_ndarray(format="bgr24")
+        mirrored_frame = cv2.flip(img, 1)
+        results = self.model(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=False)
+        for r in results:
+            im_bgr = r.plot()
+        im_rgb = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2RGB)
+        return av.VideoFrame.from_ndarray(im_rgb, format="rgb24")   
+
+def detect_webcam(conf, model):
+    webrtc_streamer(
+        key="example",
+        mode=WebRtcMode.SENDRECV,
+        video_transformer_factory=lambda: VideoTransformer(conf, model),
+        rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}],
+                        #    "iceTransportPolicy": "relay",
+                           },
+        media_stream_constraints={"video": True, "audio": False},
+        # async_processing=True,
+    )
