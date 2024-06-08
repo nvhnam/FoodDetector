@@ -253,7 +253,8 @@ def load_model():
     # modelpath = r"./model/YOLOv10s_new_VN_3_SGD.onnx"
     # modelpath = r"./model/yolov10/YOLOv10s_new_VN_3_SGD.pt"
 
-    modelpath = r"./model/yolov10/YOLOv10m_new_VN_3_SGD.pt"
+    # modelpath = r"./model/yolov10/YOLOv10m_new_VN_3_SGD.pt"
+    modelpath = r"./model/yolov10/YOLOv10m_new_VN_4_SGD.pt"
 
     # modelpath = r"./model/YOLOv10s_1_new_VN_2_SGD_YOLO_tune.pt"
     # modelpath = r"./model/YOLO8m_1_new_VN_Augm_SGD_YOLO_tuned.pt"
