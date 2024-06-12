@@ -69,13 +69,17 @@ def extract_shorts_id(url):
         return match.group(1)
     return None
 
+import time
+from collections import deque
+
 def _display_detected_frame(conf, model, st_frame, youtube_url=""):
     if youtube_url:
         youtube_id = extract_shorts_id(url=youtube_url)
         if youtube_id and youtube_url:
             valid_url = f"https://www.youtube.com/watch?v={youtube_id}"
 
-            results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu")
+            # results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu")
+            results = model.track(source=valid_url, stream=True, conf=conf, imgsz=640, device="cpu")
 
             food_names1 = []
             confidences1 = []
@@ -84,10 +88,14 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
             csv_filename = os.path.join("runs/detect/texts/", f"{time_format}.csv")
             os.makedirs("runs/detect/texts/", exist_ok=True)
 
+            fps_placeholder = st.empty()
+            fps_deque = deque(maxlen=10)
+            
             stop_button = st.button("Stop")
             stop_pressed = False
 
             for r in results:
+                start_time = time.time()
                 for pred in r.boxes: 
                     food_name = model.names[pred.cls[0].item()]
                     food_names1.append(food_name)
@@ -95,9 +103,15 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                     confidences1.append(confidence)
                 im_bgr = r.plot() 
                 im_rgb = Image.fromarray(im_bgr[..., ::-1])  
-                # im_rgb_resized = im_rgb.resize((640, 640))         
-                st_frame.image(im_rgb, caption='Predicted Video', use_column_width=True)
+                im_rgb_resized = im_rgb.resize((640, 640))         
+                st_frame.image(im_rgb_resized, caption='Predicted Video', use_column_width=True)
 
+                end_time = time.time()
+                fps = 1 / (end_time - start_time)
+                fps_deque.append(fps)
+                avg_fps = sum(fps_deque) / len(fps_deque)
+
+                fps_placeholder.text(f"FPS: {avg_fps:.2f}")
                 if stop_button:
                     stop_pressed = True
                     stop_button = None
@@ -110,8 +124,12 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                 writer.writerows(rows)  
             
             st.success("Prediction completed. Results saved to CSV.")
-            st.download_button(label="Download Predictions CSV", data=open(csv_filename, 'rb').read(), file_name=f"{time_format}.csv")
-
+            with open(csv_filename, 'rb') as file:
+                st.download_button(label="Download Predictions CSV", data=file.read(), file_name=f"{time_format}.csv")
+        else:
+            st.error("Invalid YouTube URL or unable to extract YouTube ID.")
+    else:
+        st.error("YouTube URL is required.")
 
 # def detect_from_file(conf, model, video_file, output_file):
     # if uploaded_clip:
@@ -144,71 +162,99 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
 def detect_from_file(conf, model, video_file, video_url, output_file, csv_file):
     if video_file:
         cap = cv2.VideoCapture(video_file)
-    else: 
-        cap = cv2.VideoCapture(video_url)
-    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    
-    out = cv2.VideoWriter(output_file, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
+    # else: 
+    #     cap = cv2.VideoCapture(video_url)
+        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        
+        out = cv2.VideoWriter(output_file, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
 
-    st_frame = st.empty()
-    progress_bar = st.progress(0)
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        st_frame = st.empty()
+        progress_bar = st.progress(0)
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    food_names1 = []
-    confidences1 = []
-    frames1 = []
-    col1, col2, col3 = st.columns(3, gap="large")
-    with col1:
-        st.empty()
-    with col2:
-        st.empty()
-    with col3:
-        stop_button = st.button("Stop", use_container_width=True)
+        food_names1 = []
+        confidences1 = []
+        frames1 = []
+        col1, col2, col3 = st.columns(3, gap="large")
+        with col1:
+            st.empty()
+        with col2:
+            st.empty()
+        with col3:
+            stop_button = st.button("Stop", use_container_width=True)
+            stop_pressed = False
+
+        frame_num = 0 
+        while True:
+            ret, frame = cap.read()
+            if not ret or stop_pressed:
+                break
+            results = model(source=frame, stream=True, conf=conf, imgsz=640, save=False, device="cpu")
+            for r in results:
+                for pred in r.boxes: 
+                    food_name = model.names[pred.cls[0].item()]
+                    food_names1.append(food_name)
+                    confidence = int(round(pred.conf[0].item(), 2)*100)
+                    confidences1.append(confidence)
+
+                im_bgr = r.plot() 
+                im_rgb = Image.fromarray(im_bgr[..., ::-1])
+                st_frame.image(im_rgb, caption='Predicted video', use_column_width=True)
+                out.write(im_bgr) 
+                progress_bar.progress((frame_num + 1) / total_frames)
+                frame_num += 1
+                frames1.append(frame_num)
+            if stop_button:
+                stop_pressed = True
+                stop_button = None
+                break
+        cap.release()
+        out.release()
+
+        rows = zip(frames1, food_names1, confidences1)
+        with open(csv_file, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Frame", "Food Name(s)", "Confidence(%)"])
+            writer.writerows(rows)
+    elif video_url:
+        stop_button = st.button("Stop")
         stop_pressed = False
-
-    frame_num = 0 
-    while True:
-        ret, frame = cap.read()
-        if not ret or stop_pressed:
-            break
-        results = model(source=frame, stream=True, conf=conf, imgsz=640, save=False, device="cpu")
+        st_frame = st.empty()
+        results = model(source=video_url, stream=False, conf=conf, imgsz=640, save=False, device="cpu")
+        food_names1 = []
+        confidences1 = []
+        # frames1 = []
         for r in results:
             for pred in r.boxes: 
                 food_name = model.names[pred.cls[0].item()]
                 food_names1.append(food_name)
                 confidence = int(round(pred.conf[0].item(), 2)*100)
                 confidences1.append(confidence)
-
             im_bgr = r.plot() 
-            im_rgb = Image.fromarray(im_bgr[..., ::-1])
-            st_frame.image(im_rgb, caption='Predicted video', use_column_width=True)
-            out.write(im_bgr) 
-            progress_bar.progress((frame_num + 1) / total_frames)
-            frame_num += 1
-            frames1.append(frame_num)
-        if stop_button:
-            stop_pressed = True
-            stop_button = None
-            break
+            im_rgb = Image.fromarray(im_bgr[..., ::-1])  
+            # im_rgb_resized = im_rgb.resize((640, 640))         
+            st_frame.image(im_rgb, caption='Predicted Video', use_column_width=True)
 
-    cap.release()
-    out.release()
+            if stop_button:
+                stop_pressed = True
+                stop_button = None
+                break        
 
-    rows = zip(frames1, food_names1, confidences1)
-    with open(csv_file, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["Frame", "Food Name(s)", "Confidence(%)"])
-        writer.writerows(rows)
+        rows = zip(food_names1, confidences1)
+        with open(csv_file, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Food Name(s)", "Confidence(%)"])
+            writer.writerows(rows)
 
 def detect_video(conf, model, uploaded_file, youtube_url):
     if youtube_url:
         video_id = extract_shorts_id(youtube_url)
         if video_id:
             video_url = f"https://www.youtube.com/watch?v={video_id}"
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_input_file:
-                temp_input_file_path = temp_input_file.name
+            # with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_input_file:
+            #     temp_input_file_path = temp_input_file.name
 
             videos_output_dir = 'runs/detect/videos/'
             csv_output_dir = 'runs/detect/texts/'
@@ -236,14 +282,14 @@ def detect_video(conf, model, uploaded_file, youtube_url):
 
         detect_from_file(conf=conf, model=model, video_url="", video_file=temp_input_file_path, output_file=output_video_file, csv_file=output_csv_file)
 
-    col1, col2 = st.columns(2, gap="large")
-    with col1:
-        with open(output_video_file, 'rb') as f:
-            st.download_button('Download Processed Video', f, file_name=f'{timestamp}.mp4', use_container_width=True)        
-    with col2:
-        with open(output_csv_file, 'rb') as f:
-            st.download_button('Download Predictions CSV', f, file_name=f'{timestamp}.csv', use_container_width=True)
-    st.divider()
+        col1, col2 = st.columns(2, gap="large")
+        with col1:
+            with open(output_video_file, 'rb') as f:
+                st.download_button('Download Processed Video', f, file_name=f'{timestamp}.mp4', use_container_width=True)        
+        with col2:
+            with open(output_csv_file, 'rb') as f:
+                st.download_button('Download Predictions CSV', f, file_name=f'{timestamp}.csv', use_container_width=True)
+        st.divider()
 
 @st.cache_resource
 def load_model():
@@ -456,7 +502,8 @@ def detect_camera(conf, model, address):
             success, image = vid_cap.read()
             if success:
                 mirrored_frame = cv2.flip(image, 1)            
-                results = model(source=mirrored_frame, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
+                # results = model(source=mirrored_frame, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
+                results = model.track(source=mirrored_frame, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
                 for r in results:
                     im_bgr = r.plot() 
                     im_rgb = Image.fromarray(im_bgr[..., ::-1])
@@ -474,6 +521,7 @@ def detect_camera(conf, model, address):
         vid_cap.release()
 
 
+
 class VideoTransformer(VideoProcessorBase):
     def __init__(self, conf, model):
         self.conf = conf
@@ -482,9 +530,11 @@ class VideoTransformer(VideoProcessorBase):
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
         img = frame.to_ndarray(format="bgr24")
         mirrored_frame = cv2.flip(img, 1)
-        results = self.model(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=False)
+        # results = self.model(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=False)
+        results = self.model.track(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True)
         for r in results:
             im_bgr = r.plot()
+
         im_rgb = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2RGB)
         return av.VideoFrame.from_ndarray(im_rgb, format="rgb24")   
 
@@ -497,5 +547,5 @@ def detect_webcam(conf, model):
                         #    "iceTransportPolicy": "relay",
                            },
         media_stream_constraints={"video": True, "audio": False},
-        # async_processing=True,
+        async_processing=True,
     )

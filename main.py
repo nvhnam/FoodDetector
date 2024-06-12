@@ -76,7 +76,9 @@ with st.container():
                 with col2:
                     submitted = st.form_submit_button("Predict", use_container_width=True)
             if submitted and youtube_url:            
-                _display_detected_frame(conf=confidence, model=model, st_frame=tube, youtube_url=youtube_url)
+                _display_detected_frame(conf=confidence, model=model, 
+                                        st_frame=tube,
+                                        youtube_url=youtube_url)
 
     with tab3:
         st.header("Webcam :camera:")
