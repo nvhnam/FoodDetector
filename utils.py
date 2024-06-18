@@ -75,11 +75,11 @@ from collections import deque
 def _display_detected_frame(conf, model, st_frame, youtube_url=""):
     if youtube_url:
         youtube_id = extract_shorts_id(url=youtube_url)
-        if youtube_id and youtube_url:
+        if youtube_url:
             valid_url = f"https://www.youtube.com/watch?v={youtube_id}"
 
             # results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu")
-            results = model.track(source=valid_url, stream=True, conf=conf, imgsz=640, device="cpu")
+            results = model.track(source=valid_url, stream_buffer=True, conf=conf, imgsz=640, device="cpu")
 
             food_names1 = []
             confidences1 = []
@@ -300,7 +300,8 @@ def load_model():
     # modelpath = r"./model/yolov10/YOLOv10s_new_VN_3_SGD.pt"
 
     # modelpath = r"./model/yolov10/YOLOv10m_new_VN_3_SGD.pt"
-    modelpath = r"./model/yolov10/YOLOv10m_new_VN_4_SGD.pt"
+    # modelpath = r"./model/yolov10/YOLOv10m_new_VN_4_SGD.pt"
+    modelpath = r"./model/yolov10/YOLOv10m_new_VN_4_02_SGD_loaded_weights.pt"
 
     # modelpath = r"./model/YOLOv10s_1_new_VN_2_SGD_YOLO_tune.pt"
     # modelpath = r"./model/YOLO8m_1_new_VN_Augm_SGD_YOLO_tuned.pt"
@@ -503,7 +504,7 @@ def detect_camera(conf, model, address):
             if success:
                 mirrored_frame = cv2.flip(image, 1)            
                 # results = model(source=mirrored_frame, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
-                results = model.track(source=mirrored_frame, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
+                results = model.track(source=mirrored_frame, conf=conf, imgsz=640, save=False, device="cpu", stream_buffer=True)
                 for r in results:
                     im_bgr = r.plot() 
                     im_rgb = Image.fromarray(im_bgr[..., ::-1])
