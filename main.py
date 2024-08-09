@@ -5,7 +5,7 @@ from utils import _display_detected_frame, detect_camera, detect_image, detect_v
 
 st.set_page_config(
     page_title="FoodDetector",
-    page_icon=":pizza:"
+    page_icon=":microscope:"
 )
 
 with st.sidebar:
@@ -20,10 +20,10 @@ with st.sidebar:
         st.markdown('''* **Low confident score (< 50%)**:  
                     Set a lower threshold will enable the model to detect more object - :green[high recall] because of the :green[low precision] constraint.''')
         st.divider()
-        st.caption("Made by :blue[@nvhnam01]")
+        st.markdown('''Made by [@nvhnam01](https://www.linkedin.com/in/nvhnam01/)''')
 
 with st.container():
-    st.title("Welcome to _:green[FoodDetector]_ :pizza:")
+    st.title("Welcome to _:green[FoodDetector]_ :male-detective:")
     st.divider()
 
     st.markdown('''FoodDetector use the _YOLOv10_ pretrained models for fine-tuning with VietFood57, a new custom made Vietnamese food dataset created for detecing and classifying the local dishes.  
