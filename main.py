@@ -51,15 +51,7 @@ with st.container():
             with col2:
                 submitted = st.form_submit_button("Predict", use_container_width=True)
         if submitted and picture_url:
-            detect_image(confidence, model=model1, uploaded_file=picture_url, url=True)    
-            
-        st.header("Take a picture now :camera_with_flash:")
-        show_section = st.checkbox(":point_left: Toggle to open the camera")
-        if show_section:
-            picture = st.camera_input("")
-            if picture:
-                detect_image(confidence, model=model1, uploaded_file=picture)
-        
+            detect_image(confidence, model=model1, uploaded_file=picture_url, url=True)            
 
     with tab2:
         st.header("Video Upload :movie_camera:")
