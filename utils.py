@@ -154,7 +154,12 @@ def load_model():
     # modelpath = r"./model/yolov10/YOLOv10l_new_VN_total_2_SGD.pt"
 
 
-    modelpath = r"./model/yolov10/YOLOv10n_new_VN_4_02_SGD.pt"
+    # modelpath = r"./model/yolov10/YOLOv10n_new_VN_4_02_SGD.pt"
+
+    # Not_done
+    modelpath = r"./model/yolov10/YOLOv10n_new_VN_total_4_SGD.pt"
+
+    # modelpath = r"./model/yolov10/YOLOv10l_new_VN_total_4_SGD.pt"
     
 
 
