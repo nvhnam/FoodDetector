@@ -10,7 +10,7 @@ st.divider()
 st.markdown('''_A one-stop website for anyone that want to remotely track the eating activity of their family member._
 ##### FoodDetector will have 3 main sections as follows:
             
-- `main`: The homepage of this website for uploading media files to perform inferencing and download it results in real-time.           
+- `main`: The homepage of this website for uploading media files to perform inferencing and download its results in real-time.           
 - `About`: The overview of FoodDetector sections and functions.
 - `Dataset`: Details of the VietFood57 dataset.''')
 st.markdown('''

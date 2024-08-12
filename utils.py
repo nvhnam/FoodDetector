@@ -91,6 +91,8 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                 stop_button = st.button("Stop")
                 stop_pressed = False
 
+                frame_count = 0
+                start_time = time.time()
                 for r in results:
                     for pred in r.boxes: 
                         food_name = model.names[pred.cls[0].item()]
@@ -98,14 +100,24 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                         confidence = int(round(pred.conf[0].item(), 2)*100)
                         confidences1.append(confidence)
                     im_bgr = r.plot() 
+                    frame_count += 1
+                    elapsed_time = time.time() - start_time
+                    if elapsed_time >= 1.0:
+                        fps = frame_count / elapsed_time
+                        start_time = time.time()
+                        frame_count = 0
+                    cv2.putText(im_bgr, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 4) 
+
                     im_rgb = Image.fromarray(im_bgr[..., ::-1])  
-                    im_rgb_resized = im_rgb.resize((640, 640))         
+                    im_rgb_resized = im_rgb.resize((640, 640))        
                     st_frame.image(im_rgb_resized, caption='Predicted Video', use_column_width=True)
 
                     if stop_button:
                         stop_pressed = True
                         stop_button = None
                         break
+
+                    
 
                 rows = zip(food_names1, confidences1)
 
@@ -373,6 +385,7 @@ class VideoTransformer(VideoProcessorBase):
             self.frame_count = 0
         else:
             fps = self.frame_count / elapsed_time
+  
 
         cv2.putText(im_rgb, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
