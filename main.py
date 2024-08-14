@@ -20,14 +20,16 @@ with st.sidebar:
         st.markdown('''* **Low confident score (< 50%)**:  
                     Set a lower threshold will enable the model to detect more object - :green[high recall] because of the :green[low precision] constraint.''')
         st.divider()
-        st.markdown('''Made by [@nvhnam01](https://www.linkedin.com/in/nvhnam01/)''')
+        st.markdown('''Made by [@nvhnam](https://github.com/nvhnam)''')
 
 with st.container():
     st.title("Welcome to _:green[FoodDetector]_ :male-detective:")
     st.divider()
 
-    st.markdown('''FoodDetector use the _YOLOv10_ pretrained models for fine-tuning with VietFood57, a new custom made Vietnamese food dataset created for detecing and classifying the local dishes.  
-                It can be used to detect Vietnamese food from a picture, video, webcam and an IP camera thourgh RTSP.''')
+    st.markdown('''
+FoodDetector uses the _YOLOv10n_ pretrained models for fine-tuning with `VietFood57`, a new custom-made Vietnamese food dataset created for detecting and classifying local dishes.  
+It can be used to detect <a href="/Dataset" target="_blank" style="color: #4CAF50; font-weight: bold; font-style: italic; text-decoration: none;">`57`</a> Vietnamese dishes from a picture, video, webcam, and an IP camera through RTSP.
+''', unsafe_allow_html=True)
 
     model1 = load_model()
     model = load_onnx_model()
