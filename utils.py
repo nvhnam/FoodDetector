@@ -146,47 +146,8 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
 
 @st.cache_resource
 def load_model():
-    # modelpath = r"./model/YOLOv8m_1.pt"
-    # modelpath = r"./model/YOLOv8s_1_new_VN_SGD_tuned.pt"
-    # modelpath = r"./model/YOLOv8s_2_new_VN_SGD_YOLO_tuned.pt"
-    # modelpath = r"./model/YOLOv10s_new_VN_3_SGD.onnx"
-    # modelpath = r"./model/yolov10/YOLOv10s_new_VN_3_SGD.pt"
-
-    # modelpath = r"./model/yolov10/YOLOv10m_new_VN_3_SGD.pt"
-    # modelpath = r"./model/yolov10/YOLOv10m_new_VN_4_SGD.pt"
-    # modelpath = r"./model/yolov10/YOLOv10m_new_VN_4_02_SGD_loaded_weights.pt"
-
-    # Previous
-    # modelpath = r"./model/yolov10/YOLOv10m_new_VN_4_02_SGD_loaded_weights.pt"
-    
-    # Prev
-    # modelpath = r"./model/yolov10/YOLOv10m_new_VN_total_3_SGD.pt"
-    
-    # Prev
-    # modelpath = r"./model/yolov10/YOLOv10l_new_VN_total_2_SGD.pt"
-
-
-    # modelpath = r"./model/yolov10/YOLOv10n_new_VN_4_02_SGD.pt"
-
-    # Not_done
     modelpath = r"./model/yolov10/YOLOv10n_new_VN_total_4_SGD.pt"
-
-    # modelpath = r"./model/yolov10/YOLOv10l_new_VN_total_4_SGD.pt"
-    
-
-
-    # modelpath = r"./model/yolov10/YOLOv10m_new_VN_4_02_SGD_batch16.pt"
-
-    # modelpath = r"./model/YOLOv10s_1_new_VN_2_SGD_YOLO_tune.pt"
-    # modelpath = r"./model/YOLO8m_1_new_VN_Augm_SGD_YOLO_tuned.pt"
-    # modelpath = r"./model/YOLOv8s_modified_new_VN_2_Augm_SGD.pt"
-    # modelpath = r"./model/YOLO8n_modified.pt"
-    # model = YOLOv10.from_pretrained("ThomasNg/FoodDetector")
-
     model = YOLO(modelpath)
-
-    # model = load_onnx_model()
-
     return model
 
 def resize_image(image):
@@ -406,21 +367,8 @@ def detect_webcam(conf, model):
 
 import onnxruntime as ort
 
-# model_path = "./model/yolov10/YOLOv10m_new_VN_4_02_SGD_loaded_weights.onnx"
-# model_path = "./model/yolov10/YOLOv10s_new_VN_3_SGD.onnx"
+model_path = "./model/yolov10/YOLOv10n_new_VN_total_4_SGD.onnx"
 
-model_path = "./model/yolov10/YOLOv10n_new_VN_4_02_SGD.onnx"
-
-# Prev
-# model_path = "./model/yolov10/YOLOv10m_new_VN_total_3_SGD.onnx"
-
-
-# model_path = "./model/yolov10/YOLOv10l_new_VN_total_2_SGD.onnx"
-
-
-
-# model_path = "./model/yolov10/YOLOv10m_new_VN_4_02_SGD_batch16.onnx"
-# model_path = "./model/yolov10/model.onnx"
 
 @st.cache_resource
 def load_onnx_model():
