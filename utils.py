@@ -348,7 +348,7 @@ class VideoTransformer(VideoProcessorBase):
             fps = self.frame_count / elapsed_time
   
 
-        cv2.putText(im_rgb, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(im_rgb, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         return av.VideoFrame.from_ndarray(im_rgb, format="rgb24")   
 
