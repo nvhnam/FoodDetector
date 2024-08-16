@@ -165,7 +165,7 @@ def detect_image_result(detected_image, model):
         st.plotly_chart(fig_detected, use_container_width=True)
 
         current_time = datetime.datetime.now()
-        time_format = current_time.strftime("%d-%m-%Y_%Hh-%Mm")
+        time_format = current_time.strftime("%d-%m-%Y_%H-%M")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp') as img_file:
             img_filename = img_file.name
