@@ -86,7 +86,7 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                 food_names1 = []
                 confidences1 = []
                 current_time = datetime.datetime.now()
-                time_format = current_time.strftime("%d-%m-%Y_%Hh-%Mm")
+                time_format = current_time.strftime("%d-%m-%Y")
                 
                 stop_button = st.button("Stop")
                 stop_pressed = False
@@ -168,7 +168,7 @@ def detect_image_result(detected_image, model):
         st.plotly_chart(fig_detected, use_container_width=True)
 
         current_time = datetime.datetime.now()
-        time_format = current_time.strftime("%d-%m-%Y_%H-%M")
+        time_format = current_time.strftime("%d-%m-%Y")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp') as img_file:
             img_filename = img_file.name
@@ -428,7 +428,7 @@ def detect_from_file(conf, video_file):
         cap = cv2.VideoCapture(video_file)
 
     current_time = datetime.datetime.now()
-    timestamp = current_time.strftime("%d-%m-%Y_%Hh-%Mm")
+    timestamp = current_time.strftime("%d-%m-%Y")
 
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))

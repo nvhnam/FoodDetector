@@ -14,72 +14,73 @@ This dataset contains `22,920` images with `58` classes which included an extra 
 VietFood57 is divided in `70%`/`20%`/`10%` with `16,045` images for ***train*** set, `4,585` images for ***test*** set and `2,290` images for ***valid*** set.
 ''')
 markdown_table_1 = """
-| Class ID | Food Names            |
-|----------|------------------------|
-| 0        | Banh_canh              |
-| 1        | Banh_chung             |
-| 2        | Banh_cuon              |
-| 3        | Banh_khot              |
-| 4        | Banh_mi                |
-| 5        | Banh_trang             |
-| 6        | Banh_trang_tron        |
-| 7        | Banh_xeo               |
-| 8        | Bo_kho                 |
-| 9        | Bo_la_lot              |
-| 10       | Bong_cai               |
-| 11       | Bun                    |
-| 12       | Bun_bo_Hue             |
-| 13       | Bun_cha                |
-| 14       | Bun_dau                |
-| 15       | Bun_mam                |
-| 16       | Bun_rieu               |
-| 17       | Ca                     |
-| 18       | Ca_chua                |
-| 19       | Ca_phao                |
-| 20       | Ca_rot                 |
-| 21       | Canh                   |
-| 22       | Cha                    |
-| 23       | Cha_gio                |
-| 24       | Chanh                  |
-| 25       | Com                    |
-| 26       | Com_tam                |
-| 27       | Con_nguoi              |
-| 28       | Cu_kieu                |
+| Class ID | Food Names                               |
+|----------|------------------------------------------|
+| 0        | Banh_canh (Vietnamese thick noodle soup) |
+| 1        | Banh_chung (Square sticky rice cake)     |
+| 2        | Banh_cuon (Rolled rice pancake)          |
+| 3        | Banh_khot (Mini savory pancakes)         |
+| 4        | Banh_mi (Vietnamese baguette sandwich)   |
+| 5        | Banh_trang (Rice paper)                  |
+| 6        | Banh_trang_tron (Rice paper salad)       |
+| 7        | Banh_xeo (Vietnamese sizzling pancake)   |
+| 8        | Bo_kho (Beef stew)                       |
+| 9        | Bo_la_lot (Grilled beef wrapped in betel leaves) |
+| 10       | Bong_cai (Cauliflower)                   |
+| 11       | Bun (Rice vermicelli)                    |
+| 12       | Bun_bo_Hue (Spicy beef noodle soup)      |
+| 13       | Bun_cha (Grilled pork with vermicelli)   |
+| 14       | Bun_dau (Vermicelli with tofu)           |
+| 15       | Bun_mam (Fermented fish noodle soup)     |
+| 16       | Bun_rieu (Crab noodle soup)              |
+| 17       | Ca (Fish)                                |
+| 18       | Ca_chua (Tomato)                         |
+| 19       | Ca_phao (Pickled eggplant)               |
+| 20       | Ca_rot (Carrot)                          |
+| 21       | Canh (Soup)                              |
+| 22       | Cha (Vietnamese pork roll)               |
+| 23       | Cha_gio (Spring rolls)                   |
+| 24       | Chanh (Lime)                             |
+| 25       | Com (Rice)                               |
 """
 
 markdown_table_2 = """
-| Class ID | Food Names            |
-|----------|------------------------|
-| 29       | Cua                    |
-| 30       | Dau_hu                 |
-| 31       | Dua_chua               |
-| 32       | Dua_leo                |
-| 33       | Goi_cuon               |
-| 34       | Hamburger              |
-| 35       | Heo_quay               |
-| 36       | Hu_tieu                |
-| 37       | Kho_qua_thit           |
-| 38       | Khoai_tay_chien        |
-| 39       | Lau                    |
-| 40       | Long_heo               |
-| 41       | Mi                     |
-| 42       | Muc                    |
-| 43       | Nam                    |
-| 44       | Oc                     |
-| 45       | Ot_chuong              |
-| 46       | Pho                    |
-| 47       | Pho_mai                |
-| 48       | Rau                    |
-| 49       | Salad                  |
-| 50       | Thit_bo                |
-| 51       | Thit_ga                |
-| 52       | Thit_heo               |
-| 53       | Thit_kho               |
-| 54       | Thit_nuong             |
-| 55       | Tom                    |
-| 56       | Trung                  |
-| 57       | Xoi                    |
+| Class ID | Food Names                               |
+|----------|------------------------------------------|
+| 26       | Com_tam (Broken rice)                    |
+| 27       | Con_nguoi (Human)                        |
+| 28       | Cu_kieu (Pickled scallion head)          |
+| 29       | Cua (Crab)                               |
+| 30       | Dau_hu (Tofu)                            |
+| 31       | Dua_chua (Pickled vegetables)            |
+| 32       | Dua_leo (Cucumber)                       |
+| 33       | Goi_cuon (Fresh spring rolls)            |
+| 34       | Hamburger                                |
+| 35       | Heo_quay (Roast pork)                    |
+| 36       | Hu_tieu (Clear rice noodle soup)         |
+| 37       | Kho_qua_thit (Stuffed bitter melon soup) |
+| 38       | Khoai_tay_chien (French fries)           |
+| 39       | Lau (Hotpot)                             |
+| 40       | Long_heo (Pork offal)                    |
+| 41       | Mi (Egg noodles)                         |
+| 42       | Muc (Squid)                              |
+| 43       | Nam (Mushroom)                           |
+| 44       | Oc (Snails)                              |
+| 45       | Ot_chuong (Bell pepper)                  |
+| 46       | Pho (Vietnamese noodle soup)             |
+| 47       | Pho_mai (Cheese)                         |
+| 48       | Rau (Vegetables)                         |
+| 49       | Salad (Salad)                            |
+| 50       | Thit_bo (Beef)                           |
+| 51       | Thit_ga (Chicken)                        |
+| 52       | Thit_heo (Pork)                          |
+| 53       | Thit_kho (Braised pork)                  |
+| 54       | Thit_nuong (Grilled meat)                |
+| 55       | Tom (Shrimp)                             |
+| 56       | Trung (Egg)                              |
+| 57       | Xoi (Sticky rice)                        |
 """
+
 
 col1, col2 = st.columns(2, gap="large")
 
