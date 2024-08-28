@@ -27,7 +27,7 @@ with st.container():
     st.divider()
 
     st.markdown('''
-FoodDetector uses the _YOLOv10n_ pretrained models for fine-tuning with `VietFood57`, a new custom-made Vietnamese food dataset created for detecting and classifying local dishes.  
+FoodDetector uses the _YOLOv10m_ pretrained models for fine-tuning with `VietFood57`, a new custom-made Vietnamese food dataset created for detecting local dishes and achieved a `mAP50` of `0.934`.  
 It can be used to detect <a href="/Dataset" target="_blank" style="color: #4CAF50; font-weight: bold; font-style: italic; text-decoration: none;">`57`</a> Vietnamese dishes from a picture, video, webcam, and an IP camera through RTSP.
 ''', unsafe_allow_html=True)
 

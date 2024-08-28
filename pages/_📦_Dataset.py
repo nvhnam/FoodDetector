@@ -16,69 +16,69 @@ VietFood57 is divided in `70%`/`20%`/`10%` with `16,045` images for ***train*** 
 markdown_table_1 = """
 | Class ID | Food Names                               |
 |----------|------------------------------------------|
-| 0        | Banh_canh (Vietnamese thick noodle soup) |
-| 1        | Banh_chung (Square sticky rice cake)     |
-| 2        | Banh_cuon (Rolled rice pancake)          |
-| 3        | Banh_khot (Mini savory pancakes)         |
-| 4        | Banh_mi (Vietnamese baguette sandwich)   |
-| 5        | Banh_trang (Rice paper)                  |
-| 6        | Banh_trang_tron (Rice paper salad)       |
-| 7        | Banh_xeo (Vietnamese sizzling pancake)   |
-| 8        | Bo_kho (Beef stew)                       |
-| 9        | Bo_la_lot (Grilled beef wrapped in betel leaves) |
-| 10       | Bong_cai (Cauliflower)                   |
-| 11       | Bun (Rice vermicelli)                    |
-| 12       | Bun_bo_Hue (Spicy beef noodle soup)      |
-| 13       | Bun_cha (Grilled pork with vermicelli)   |
-| 14       | Bun_dau (Vermicelli with tofu)           |
-| 15       | Bun_mam (Fermented fish noodle soup)     |
-| 16       | Bun_rieu (Crab noodle soup)              |
-| 17       | Ca (Fish)                                |
-| 18       | Ca_chua (Tomato)                         |
-| 19       | Ca_phao (Pickled eggplant)               |
-| 20       | Ca_rot (Carrot)                          |
+| 0        | Bánh canh (Vietnamese thick noodle soup) |
+| 1        | Bánh chưng (Square sticky rice cake)     |
+| 2        | Bánh cuốn (Rolled rice pancake)          |
+| 3        | Bánh khọt (Mini savory pancakes)         |
+| 4        | Bánh mì (Vietnamese baguette sandwich)   |
+| 5        | Bánh tráng (Rice paper)                  |
+| 6        | Bánh tráng trộn (Rice paper salad)       |
+| 7        | Bánh xèo (Vietnamese sizzling pancake)   |
+| 8        | Bò kho (Beef stew)                       |
+| 9        | Bò lá lốt (Grilled beef wrapped in betel leaves) |
+| 10       | Bông cải (Cauliflower)                   |
+| 11       | Bún (Rice vermicelli)                    |
+| 12       | Bún bò Huế (Spicy beef noodle soup)      |
+| 13       | Bún chả (Grilled pork with vermicelli)   |
+| 14       | Bún đậu (Vermicelli with tofu)           |
+| 15       | Bún mắm (Fermented fish noodle soup)     |
+| 16       | Bún riêu (Crab noodle soup)              |
+| 17       | Cá (Fish)                                |
+| 18       | Cà chua (Tomato)                         |
+| 19       | Cà pháo (Pickled eggplant)               |
+| 20       | Cà rốt (Carrot)                          |
 | 21       | Canh (Soup)                              |
-| 22       | Cha (Vietnamese pork roll)               |
-| 23       | Cha_gio (Spring rolls)                   |
+| 22       | Chả (Vietnamese pork roll)               |
+| 23       | Chả giò (Spring rolls)                   |
 | 24       | Chanh (Lime)                             |
-| 25       | Com (Rice)                               |
+| 25       | Cơm (Rice)                               |
 """
 
 markdown_table_2 = """
 | Class ID | Food Names                               |
 |----------|------------------------------------------|
-| 26       | Com_tam (Broken rice)                    |
-| 27       | Con_nguoi (Human)                        |
-| 28       | Cu_kieu (Pickled scallion head)          |
+| 26       | Cơm tấm (Broken rice)                    |
+| 27       | Con người (Human)                        |
+| 28       | Củ kiệu (Pickled scallion head)          |
 | 29       | Cua (Crab)                               |
-| 30       | Dau_hu (Tofu)                            |
-| 31       | Dua_chua (Pickled vegetables)            |
-| 32       | Dua_leo (Cucumber)                       |
-| 33       | Goi_cuon (Fresh spring rolls)            |
+| 30       | Đậu hũ (Tofu)                            |
+| 31       | Dưa chua (Pickled vegetables)            |
+| 32       | Dưa leo (Cucumber)                       |
+| 33       | Gỏi cuốn (Fresh spring rolls)            |
 | 34       | Hamburger                                |
-| 35       | Heo_quay (Roast pork)                    |
-| 36       | Hu_tieu (Clear rice noodle soup)         |
-| 37       | Kho_qua_thit (Stuffed bitter melon soup) |
-| 38       | Khoai_tay_chien (French fries)           |
-| 39       | Lau (Hotpot)                             |
-| 40       | Long_heo (Pork offal)                    |
-| 41       | Mi (Egg noodles)                         |
-| 42       | Muc (Squid)                              |
-| 43       | Nam (Mushroom)                           |
-| 44       | Oc (Snails)                              |
-| 45       | Ot_chuong (Bell pepper)                  |
-| 46       | Pho (Vietnamese noodle soup)             |
-| 47       | Pho_mai (Cheese)                         |
+| 35       | Heo quay (Roast pork)                    |
+| 36       | Hủ tiếu (Clear rice noodle soup)         |
+| 37       | Khổ qua thịt (Stuffed bitter melon soup) |
+| 38       | Khoai tây chiên (French fries)           |
+| 39       | Lẩu (Hotpot)                             |
+| 40       | Lòng heo (Pork offal)                    |
+| 41       | Mì (Egg noodles)                         |
+| 42       | Mực (Squid)                              |
+| 43       | Nấm (Mushroom)                           |
+| 44       | Ốc (Snails)                              |
+| 45       | Ớt chuông (Bell pepper)                  |
+| 46       | Phở (Vietnamese noodle soup)             |
+| 47       | Phô mai (Cheese)                         |
 | 48       | Rau (Vegetables)                         |
 | 49       | Salad (Salad)                            |
-| 50       | Thit_bo (Beef)                           |
-| 51       | Thit_ga (Chicken)                        |
-| 52       | Thit_heo (Pork)                          |
-| 53       | Thit_kho (Braised pork)                  |
-| 54       | Thit_nuong (Grilled meat)                |
-| 55       | Tom (Shrimp)                             |
-| 56       | Trung (Egg)                              |
-| 57       | Xoi (Sticky rice)                        |
+| 50       | Thịt bò (Beef)                           |
+| 51       | Thịt gà (Chicken)                        |
+| 52       | Thịt heo (Pork)                          |
+| 53       | Thịt kho (Braised pork)                  |
+| 54       | Thịt nướng (Grilled meat)                |
+| 55       | Tôm (Shrimp)                             |
+| 56       | Trứng (Egg)                              |
+| 57       | Xôi (Sticky rice)                        |
 """
 
 
@@ -104,5 +104,5 @@ Some augmentation techniques were used to make sure the model can generalize wel
 - `Bounding box flip`: flip vertically.
 - `Brightness adjustments`: between `-15%` and `+15%`.
 - `Mosaic augmentation`
-Overall, the total images obtain for training model after the augmentation process are 31,495 images. 
+Overall, the total images obtain for training model after the augmentation process are 66,593 images. 
 ''')

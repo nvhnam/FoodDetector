@@ -1,0 +1,1 @@
+model/yolov10/YOLOv10m_new_total_VN_5_SGD.pt filter=lfs diff=lfs merge=lfs -text

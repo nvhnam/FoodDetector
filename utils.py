@@ -146,9 +146,7 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
 
 @st.cache_resource
 def load_model():
-    # modelpath = r"./model/yolov10/YOLOv10n_new_VN_total_4_SGD.pt"
-
-    modelpath = r"./model/yolov10/YOLOv10n_new_VN_total_4_English_SGD.pt"
+    modelpath = r"./model/yolov10/YOLOv10m_new_total_VN_5_SGD.pt"
     
     model = YOLO(modelpath)
     return model
@@ -370,9 +368,7 @@ def detect_webcam(conf, model):
 
 import onnxruntime as ort
 
-# model_path = "./model/yolov10/YOLOv10n_new_VN_total_4_SGD.onnx"
-
-model_path = "./model/yolov10/YOLOv10n_new_VN_total_4_English_SGD.onnx"
+model_path = "./model/yolov10/YOLOv10m_new_total_VN_5_SGD.onnx"
 
 
 @st.cache_resource
