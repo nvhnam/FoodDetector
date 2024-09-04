@@ -82,7 +82,7 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
             valid_url = youtube_id
             st.toast("Connecting", icon="🕒")
             try:
-                results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu")
+                results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu", vid_stride=5)
                 food_names1 = []
                 confidences1 = []
                 current_time = datetime.datetime.now()
@@ -259,7 +259,7 @@ def detect_image(conf, model, uploaded_file, url=False):
             uploaded_image = Image.open(BytesIO(response.content))
 
         resized_uploaded_image = resize_image(uploaded_image)
-        st.image(resized_uploaded_image, output_format="JPEG", use_column_width=False)
+        st.image(resized_uploaded_image, output_format="JPEG", use_column_width=True)
 
         col1, col2 = st.columns([0.8, 0.2], gap="large")
         with col1:
@@ -330,7 +330,7 @@ class VideoTransformer(VideoProcessorBase):
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
         img = frame.to_ndarray(format="bgr24")
         mirrored_frame = cv2.flip(img, 1)
-        results = self.model(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True)
+        results = self.model(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True, vid_stride=80)
         # results = self.model.track(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True)
         for r in results:
             im_bgr = r.plot()
