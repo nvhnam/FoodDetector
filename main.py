@@ -51,7 +51,7 @@ It can be used to detect <a href="/Dataset" target="_blank" style="color: #4CAF5
             with col1:
                 picture_url = st.text_input("", label_visibility="collapsed", placeholder="https://ultralytics.com/images/bus.jpg")
             with col2:
-                submitted = st.form_submit_button("Predict", use_container_width=True)
+                submitted = st.form_submit_button("Enter", use_container_width=True)
         if submitted and picture_url:
             detect_image(confidence, model=model1, uploaded_file=picture_url, url=True)            
 

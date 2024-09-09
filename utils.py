@@ -21,6 +21,8 @@ import io
 import base64
 import plotly.graph_objects as go
 
+from class_names import class_names
+
 def create_fig(image, detected=False):
 
     if not isinstance(image, Image.Image):
@@ -168,7 +170,8 @@ def detect_image_result(detected_image, model):
         current_time = datetime.datetime.now()
         time_format = current_time.strftime("%d-%m-%Y")
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp') as img_file:
+        # with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp') as img_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4', dir=tempfile.gettempdir()) as img_file:
             img_filename = img_file.name
             cv2.imwrite(img_filename, detected_img_arr_RGB)
         with open(img_filename, 'rb') as file:
@@ -178,23 +181,79 @@ def detect_image_result(detected_image, model):
             detection_results = ""
             count_dict = {}
             food_names = []
+            nutrition_data = []
             confidences = []
             counts = []
+            total_nutrition = {
+                "Calories": 0,
+                "Fat": 0,
+                "Saturates": 0,
+                "Sugar": 0,
+                "Salt": 0
+            }
 
             for box in boxes:
-                class_id = model.names[box.cls[0].item()]
-                food_names.append(class_id)
+                # class_id = model.names[box.cls[0].item()]
+                class_id = int(box.cls[0].item())
+                class_name = class_names[int(class_id)]["name"] 
+                food_names.append(class_name)
                 conf = int(round(box.conf[0].item(), 2)*100)
                 confidences.append(conf)
+                serving = class_names[int(class_id)]["serving_type"]
 
-                detection_results += f"<b style='color: cyan;'>Food name:</b> {class_id}<br><b style='color: cyan;'>Confidence:</b> {conf}%<br>---<br>"
+                if class_name == "Con nguoi (Human)":
+                    detection_results += f"<b style='color: cyan;'>Food name:</b> {class_name}<br><b style='color: cyan;'>Confidence:</b> {conf}%<br>---<br>"
+                else:
+                    nutrition = class_names[int(class_id)]["nutrition"]
+                    if nutrition:
+                        nutrition_str = (
+                            f"Calories: {nutrition.get('Calories')} kcal, "
+                            f"Fat: {nutrition.get('Fat')} g, "
+                            f"Saturates: {nutrition.get('Saturates')} g, "
+                            f"Sugar: {nutrition.get('Sugar')} g, "
+                            f"Salt: {nutrition.get('Salt')} g"
+                        )
+
+                    detection_results += (
+                        f"<b style='color: cyan;'>Food name:</b> {class_name}<br>"
+                        f"<b style='color: cyan;'>Confidence:</b> {conf}%<br>"
+                        f"<b style='color: cyan;'>Nutrition:</b> {nutrition_str}<br>---<br>"
+                    )
+
+                    for key in total_nutrition:
+                        if key in nutrition:
+                            total_nutrition[key] += nutrition[key]
+
+                    nutrition_data.append((
+                        class_name,
+                        serving,
+                        conf,
+                        nutrition.get('Calories'),
+                        nutrition.get('Fat'),
+                        nutrition.get('Saturates'),
+                        nutrition.get('Sugar'),
+                        nutrition.get('Salt')
+                    ))
+
                 if class_id in count_dict:
                     count_dict[class_id] += 1
                 else:
                     count_dict[class_id] = 1
+
+            total_nutrition_str = (
+                f"<b style='color: cyan;'>Total Nutrition:</b> "
+                f"Calories: {total_nutrition['Calories']:.1f} kcal, "
+                f"Fat: {total_nutrition['Fat']:.1f} g, "
+                f"Saturates: {total_nutrition['Saturates']:.1f} g, "
+                f"Sugar: {total_nutrition['Sugar']:.1f} g, "
+                f"Salt: {total_nutrition['Salt']:.1f} g<br>"
+            )
+            detection_results += total_nutrition_str
+
             for object_type, count in count_dict.items():
+                the_name = class_names[object_type]["name"]
                 counts.append(count)
-                detection_results += f"<b style='color: cyan;'>Count of {object_type}:</b> {count}<br>"
+                detection_results += f"<b style='color: cyan;'>Count of {the_name}:</b> {count}<br>"
 
             scrollable_textbox = f"""
                 <div style="
@@ -202,7 +261,7 @@ def detect_image_result(detected_image, model):
                     font-size: 16px;
                     overflow-y: scroll;
                     padding: 10px;
-                    width: 400px;
+                    width: auto;
                     height: 400px;
                 ">
                     {detection_results}
@@ -212,14 +271,16 @@ def detect_image_result(detected_image, model):
             st.markdown("""### Results:""")
             st.markdown(scrollable_textbox, unsafe_allow_html=True)
 
-            rows = zip(food_names, confidences, counts)
+            # rows = zip(food_names, confidences, counts)
+            # rows = zip(nutrition_data)
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir='/tmp') as csv_file:
+            # with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir='/tmp') as csv_file:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4', dir=tempfile.gettempdir()) as csv_file:
                 csv_filename = csv_file.name
             with open(csv_filename, mode='w', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow(["Food Name(s)", "Confidence(%)", "Count"])
-                writer.writerows(rows)
+                writer.writerow(["Food Name", "Serving", "Confidence (%)", "Calories (kcal)", "Fat (g)", "Saturates (g)", "Sugar (g)", "Salt (g)"])
+                writer.writerows(nutrition_data)
             with open(csv_filename, 'rb') as file:
                 the_csv = file.read()
         col1, col2 = st.columns(2, gap="large")
@@ -248,9 +309,23 @@ def detect_image_result(detected_image, model):
             confidence threshold in the sidebar and try again.
         """)
 
-
-def detect_image(conf, model, uploaded_file, url=False):
+# @st.fragment
+def detect_image(conf, uploaded_file, model, url=False):
     if uploaded_file is not None:
+        if "button_clicked" not in st.session_state:
+            st.session_state.button_clicked = False
+        
+        if "show_image" not in st.session_state:
+            st.session_state.show_image = True
+
+        reset_button = None
+        predict_button = None
+        
+        def toggle_button(reset = False):
+            st.session_state.button_clicked = not st.session_state.button_clicked
+            if reset == True:
+                st.session_state.show_image = not st.session_state.show_image
+        
         if url==False:
             uploaded_image = Image.open(uploaded_file)
         else:
@@ -259,22 +334,35 @@ def detect_image(conf, model, uploaded_file, url=False):
             uploaded_image = Image.open(BytesIO(response.content))
 
         resized_uploaded_image = resize_image(uploaded_image)
-        st.image(resized_uploaded_image, output_format="JPEG", use_column_width=True)
 
-        col1, col2 = st.columns([0.8, 0.2], gap="large")
-        with col1:
-            st.markdown("**Original Image**")
-        with col2:
-            if url==False:
-                predict_button = st.button("Predict", use_container_width=True, type="primary")
-        if url==False and predict_button:
+        if not st.session_state.show_image :
+            original_image = st.empty()
+            
+            st.session_state.show_image = True
+        else: 
+            original_image = st.image(resized_uploaded_image, output_format="JPEG", use_column_width=True)
+            col1, col2 = st.columns([0.8, 0.2], gap="large")
+            with col1:
+                st.markdown("**Original Image**")
+            with col2:
+                if not st.session_state.button_clicked:
+                    predict_button = st.button("Predict", use_container_width=True, type="primary", on_click=toggle_button)
+                else:
+                    reset_button = st.button("Reset", use_container_width=True, type="primary", on_click=toggle_button, args=[True])
+                    uploaded_file = None
+
+        if st.session_state.button_clicked and not reset_button:
             with st.spinner("Running..."):
                 detected_image = model.predict(resized_uploaded_image, conf=conf, imgsz=640)
-                detect_image_result(detected_image, model)
-        elif uploaded_file and url:
-            with st.spinner("Running..."):
-                detected_image = model(resized_uploaded_image, conf=conf, imgsz=640)
-                detect_image_result(detected_image, model)
+                detect_image_result(detected_image, model)        
+        # elif uploaded_file and url:
+        #     with st.spinner("Running..."):
+        #         detected_image = model(resized_uploaded_image, conf=conf, imgsz=640)
+        #         detect_image_result(detected_image, model)
+
+        
+        # elif url==False and not st.session_state.button_clicked and not predict_button:
+        #     original_image.image(resized_uploaded_image, output_format="JPEG", use_column_width=True)
 
 def detect_camera(conf, model, address):
     vid_cap = cv2.VideoCapture('rtsp://admin:' + address)
@@ -390,7 +478,7 @@ def preprocess(image):
     img = np.expand_dims(img, axis=0)
     return img
 
-from class_names import class_names
+
 
 def postprocess(outputs, frame, original_size, conf, model):
     h, w, _ = original_size
@@ -402,7 +490,7 @@ def postprocess(outputs, frame, original_size, conf, model):
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 if class_id < len(class_names):
-                    class_name = class_names[int(class_id)]
+                    class_name = class_names[int(class_id)]["name"]
                 label = f"{class_name}: {score:.2f}"
 
                 font_scale = 1.0  
