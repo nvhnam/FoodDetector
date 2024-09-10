@@ -171,7 +171,7 @@ def detect_image_result(detected_image, model):
         time_format = current_time.strftime("%d-%m-%Y")
 
         # with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp') as img_file:
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4', dir=tempfile.gettempdir()) as img_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir=tempfile.gettempdir()) as img_file:
             img_filename = img_file.name
             cv2.imwrite(img_filename, detected_img_arr_RGB)
         with open(img_filename, 'rb') as file:
@@ -275,7 +275,7 @@ def detect_image_result(detected_image, model):
             # rows = zip(nutrition_data)
 
             # with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir='/tmp') as csv_file:
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4', dir=tempfile.gettempdir()) as csv_file:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir=tempfile.gettempdir()) as csv_file:
                 csv_filename = csv_file.name
             with open(csv_filename, mode='w', newline='') as file:
                 writer = csv.writer(file)
