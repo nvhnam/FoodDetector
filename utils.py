@@ -123,7 +123,8 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
 
                 rows = zip(food_names1, confidences1)
 
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
+                # with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir=tempfile.gettempdir()) as csv_file:
                     csv_filename = csv_file.name
                 with open(csv_filename, mode='w', newline='') as file:
                     writer = csv.writer(file)
