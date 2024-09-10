@@ -500,12 +500,164 @@ def postprocess(outputs, frame, original_size, conf, model):
                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 255, 0), thickness)
         return frame
 
-def detect_video(conf, uploaded_file):
+def detect_video(conf, uploaded_file, model):
     if uploaded_file:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_input_file:
             temp_input_file.write(uploaded_file.read())
             temp_input_file_path = temp_input_file.name
-        detect_from_file(conf=conf, video_file=temp_input_file_path)
+
+        cap = cv2.VideoCapture(temp_input_file_path)
+
+        # Prepare output video file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as output_file:
+            output_filename = output_file.name
+
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for mp4
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        out = cv2.VideoWriter(output_filename, fourcc, fps, (width, height))
+
+        detection_results = ""
+        count_dict = {}
+        food_details = []
+        total_nutrition = {
+            "Calories": 0,
+            "Fat": 0,
+            "Saturates": 0,
+            "Sugar": 0,
+            "Salt": 0
+        }
+
+        st.markdown("### Processing Video...")
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            resized_frame = cv2.resize(frame, (640, 640))
+            detected_image = model.predict(resized_frame, conf=conf)
+
+            for box in detected_image[0].boxes:
+                class_id = int(box.cls[0].item())
+                class_name = class_names[class_id]["name"]
+                conf = int(round(box.conf[0].item(), 2) * 100)
+
+                # Collect detection data
+                serving = class_names[class_id]["serving_type"]
+
+                if class_name == "Con nguoi (Human)":
+                    detection_results += f"<b style='color: cyan;'>Food name:</b> {class_name}<br><b style='color: cyan;'>Confidence:</b> {conf}%<br>---<br>"
+                else:
+                    nutrition = class_names[class_id]["nutrition"]
+                    nutrition_str = (
+                        f"Calories: {nutrition.get('Calories')} kcal, "
+                        f"Fat: {nutrition.get('Fat')} g, "
+                        f"Saturates: {nutrition.get('Saturates')} g, "
+                        f"Sugar: {nutrition.get('Sugar')} g, "
+                        f"Salt: {nutrition.get('Salt')} g"
+                    )
+
+                    detection_results += (
+                        f"<b style='color: cyan;'>Food name:</b> {class_name}<br>"
+                        f"<b style='color: cyan;'>Confidence:</b> {conf}%<br>"
+                        f"<b style='color: cyan;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
+                    )
+
+                    # Update total nutrition
+                    for key in total_nutrition:
+                        if key in nutrition:
+                            total_nutrition[key] += nutrition[key]
+
+                    food_details.append((
+                        class_name,
+                        serving,
+                        conf,
+                        nutrition.get('Calories'),
+                        nutrition.get('Fat'),
+                        nutrition.get('Saturates'),
+                        nutrition.get('Sugar'),
+                        nutrition.get('Salt')
+                    ))
+
+                count_dict[class_id] = count_dict.get(class_id, 0) + 1
+
+            out.write(frame)
+
+        cap.release()
+        out.release()
+
+        # Display detection summary like in `detect_image_result`
+        st.markdown("### Results:")
+        total_nutrition_str = (
+            f"<b style='color: cyan;'>Total Nutrition:</b> "
+            f"Calories: {total_nutrition['Calories']:.1f} kcal, "
+            f"Fat: {total_nutrition['Fat']:.1f} g, "
+            f"Saturates: {total_nutrition['Saturates']:.1f} g, "
+            f"Sugar: {total_nutrition['Sugar']:.1f} g, "
+            f"Salt: {total_nutrition['Salt']:.1f} g<br>"
+        )
+        detection_results += total_nutrition_str
+
+        for object_type, count in count_dict.items():
+            the_name = class_names[object_type]["name"]
+            detection_results += f"<b style='color: cyan;'>Count of {the_name}:</b> {count}<br>"
+
+        scrollable_textbox = f"""
+            <div style="
+                font-family: 'Source Code Pro','monospace';
+                font-size: 16px;
+                overflow-y: scroll;
+                padding: 10px;
+                width: auto;
+                height: 400px;
+            ">
+                {detection_results}
+            </div>
+        """
+        st.markdown(scrollable_textbox, unsafe_allow_html=True)
+
+        # Generate CSV as before and provide download options
+        col1, col2 = st.columns(2, gap="large")
+        with col1:
+            with open(output_filename, 'rb') as f:
+                video_data = f.read()
+            download_video = st.download_button(
+                label="Download Detected Video", 
+                data=video_data,
+                mime="video/mp4", 
+                file_name="detected_video.mp4", 
+                use_container_width=True,
+                key="video_download_button"  # Unique key
+            )
+            if download_video:
+                os.remove(output_filename)
+
+        with col2:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir=tempfile.gettempdir()) as csv_file:
+                csv_filename = csv_file.name
+            with open(csv_filename, mode='w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(["Food Name", "Serving", "Confidence (%)", "Calories (kcal)", "Fat (g)", "Saturates (g)", "Sugar (g)", "Salt (g)"])
+                writer.writerows(food_details)
+            with open(csv_filename, 'rb') as file:
+                the_csv = file.read()
+
+            download_csv = st.download_button(
+                label="Download Predictions CSV", 
+                data=the_csv, 
+                file_name="detection_summary.csv", 
+                use_container_width=True,
+                key="csv_download_button"  # Unique key
+            )
+            if download_csv:
+                os.remove(csv_filename)
+
+        os.remove(temp_input_file_path)
+
+    else:
+        st.markdown("### No video file uploaded.")
 
 def detect_from_file(conf, video_file):
     session, input_name, output_name = load_onnx_model()
