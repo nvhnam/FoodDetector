@@ -121,7 +121,7 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
 
                 rows = zip(food_names1, confidences1)
 
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir=tempfile.gettempdir()) as csv_file:
                     csv_filename = csv_file.name
                 with open(csv_filename, mode='w', newline='') as file:
                     writer = csv.writer(file)
@@ -168,7 +168,7 @@ def detect_image_result(detected_image, model):
         current_time = datetime.datetime.now()
         time_format = current_time.strftime("%d-%m-%Y")
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp') as img_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir=tempfile.gettempdir()) as img_file:
             img_filename = img_file.name
             cv2.imwrite(img_filename, detected_img_arr_RGB)
         with open(img_filename, 'rb') as file:
@@ -214,7 +214,7 @@ def detect_image_result(detected_image, model):
 
             rows = zip(food_names, confidences, counts)
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir='/tmp') as csv_file:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir=tempfile.gettempdir()) as csv_file:
                 csv_filename = csv_file.name
             with open(csv_filename, mode='w', newline='') as file:
                 writer = csv.writer(file)
@@ -431,7 +431,7 @@ def detect_from_file(conf, video_file):
     fps = cap.get(cv2.CAP_PROP_FPS)
     original_size = (int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), 3)
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4', dir='/tmp') as mp4_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4', dir=tempfile.gettempdir()) as mp4_file:
         mp4_filename = mp4_file.name
         out = cv2.VideoWriter(mp4_filename, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
     with open(mp4_filename, "rb") as file:
@@ -510,7 +510,7 @@ def detect_from_file(conf, video_file):
 
     rows = zip(frames1, food_names1, confidences1)
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir=tempfile.gettempdir()) as csv_file:
         csv_filename = csv_file.name
     with open(csv_filename, mode='w', newline='') as file:
         writer = csv.writer(file)
