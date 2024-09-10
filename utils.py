@@ -85,8 +85,17 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
             st.toast("Connecting", icon="🕒")
             try:
                 results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu", vid_stride=5)
-                food_names1 = []
-                confidences1 = []
+                displayed_dishes = set()
+                total_nutrition = {
+                    "Calories": 0,
+                    "Fat": 0,
+                    "Saturates": 0,
+                    "Sugar": 0,
+                    "Salt": 0
+                }
+                detection_results = ""
+                new_detections = False
+                nutrition_data = []
                 current_time = datetime.datetime.now()
                 time_format = current_time.strftime("%d-%m-%Y")
                 
@@ -97,10 +106,48 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                 start_time = time.time()
                 for r in results:
                     for pred in r.boxes: 
-                        food_name = model.names[pred.cls[0].item()]
-                        food_names1.append(food_name)
-                        confidence = int(round(pred.conf[0].item(), 2)*100)
-                        confidences1.append(confidence)
+                        class_id = int(pred.cls[0].item())
+                        class_name = class_names[int(class_id)]["name"]
+                        confident = int(round(pred.conf[0].item(), 2)*100)
+                        serving = class_names[int(class_id)]["serving_type"]
+
+                        if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
+                            detection_results += f"<b style='color: cyan;'>Class name:</b> {class_name}<br><b style='color: cyan;'>Confidence:</b> {confident}%<br>---<br>"
+                            displayed_dishes.add(class_name)
+                            new_detections = True
+                        elif class_name not in displayed_dishes:
+                            nutrition = class_names[int(class_id)]["nutrition"]
+                            if nutrition:
+                                displayed_dishes.add(class_name)
+                                new_detections = True
+                                nutrition_str = (
+                                    f"Calories: {nutrition.get('Calories')} kcal, "
+                                    f"Fat: {nutrition.get('Fat')} g, "
+                                    f"Saturates: {nutrition.get('Saturates')} g, "
+                                    f"Sugar: {nutrition.get('Sugar')} g, "
+                                    f"Salt: {nutrition.get('Salt')} g"
+                                )
+
+                                detection_results += (
+                                    f"<b style='color: cyan;'>Food name:</b> {class_name}<br>"
+                                    f"<b style='color: cyan;'>Confidence:</b> {confident}%<br>"
+                                    f"<b style='color: cyan;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
+                                )
+
+                                for key in total_nutrition:
+                                    if key in nutrition:
+                                        total_nutrition[key] += nutrition[key]
+
+                            nutrition_data.append((
+                                class_name,
+                                serving,
+                                confident,
+                                nutrition.get('Calories'),
+                                nutrition.get('Fat'),
+                                nutrition.get('Saturates'),
+                                nutrition.get('Sugar'),
+                                nutrition.get('Salt')
+                            ))
                     im_bgr = r.plot() 
                     frame_count += 1
                     elapsed_time = time.time() - start_time
@@ -118,21 +165,47 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                         stop_pressed = True
                         stop_button = None
                         break
-
+                
+                st.markdown("""### Results:""")
+                if new_detections:
+                    scrollable_textbox = f"""
+                        <div style="
+                            font-family: 'Source Code Pro','monospace';
+                            font-size: 16px;
+                            overflow-y: scroll;
+                            padding: 10px;
+                            width: auto;
+                            height: auto;
+                        ">
+                            {detection_results}
+                        </div>
+                    """
+                    st.markdown(scrollable_textbox, unsafe_allow_html=True)
                     
+                displayed_dishes.clear()
 
-                rows = zip(food_names1, confidences1)
+                total_nutrition_str = (
+                                f"<b style='color: cyan;'>Total Nutrition:</b> "
+                                f"Calories: {total_nutrition['Calories']:.1f} kcal, "
+                                f"Fat: {total_nutrition['Fat']:.1f} g, "
+                                f"Saturates: {total_nutrition['Saturates']:.1f} g, "
+                                f"Sugar: {total_nutrition['Sugar']:.1f} g, "
+                                f"Salt: {total_nutrition['Salt']:.1f} g<br>"
+                            )
+                st.markdown(total_nutrition_str, unsafe_allow_html=True)
+                # rows = zip(food_names1, confidences1)
 
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
+                # with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir=tempfile.gettempdir()) as csv_file:
                     csv_filename = csv_file.name
                 with open(csv_filename, mode='w', newline='') as file:
                     writer = csv.writer(file)
-                    writer.writerow(["Food Name(s)", "Confidence(%)"])
-                    writer.writerows(rows)
+                    writer.writerow(["Food Name", "Serving", "Confidence (%)", "Calories (kcal)", "Fat (g)", "Saturates (g)", "Sugar (g)", "Salt (g)"])
+                    writer.writerows(nutrition_data)
                 with open(csv_filename, "rb") as file:
                     the_csv = file.read()  
                 
-                st.success("Prediction completed. Results saved to CSV.")
+                st.toast("Prediction completed. Results saved to CSV.", icon="✅")
                 download_csv = st.download_button(label="Download Predictions CSV",
                                 data=the_csv,
                                 file_name=f"{time_format}.csv", 
@@ -202,7 +275,7 @@ def detect_image_result(detected_image, model):
                 serving = class_names[int(class_id)]["serving_type"]
 
                 if class_name == "Con nguoi (Human)":
-                    detection_results += f"<b style='color: cyan;'>Food name:</b> {class_name}<br><b style='color: cyan;'>Confidence:</b> {conf}%<br>---<br>"
+                    detection_results += f"<b style='color: cyan;'>Class name:</b> {class_name}<br><b style='color: cyan;'>Confidence:</b> {conf}%<br>---<br>"
                 else:
                     nutrition = class_names[int(class_id)]["nutrition"]
                     if nutrition:
@@ -528,9 +601,17 @@ def detect_from_file(conf, video_file):
 
     st_frame = st.empty()
 
-    food_names1 = []
-    confidences1 = []
     frames1 = []
+    displayed_dishes = set()
+    nutrition_data = []
+    
+    total_nutrition = {
+        "Calories": 0,
+        "Fat": 0,
+        "Saturates": 0,
+        "Sugar": 0,
+        "Salt": 0
+    }
 
     col1, col2, col3 = st.columns(3, gap="large")
     with col1:
@@ -546,6 +627,8 @@ def detect_from_file(conf, video_file):
         
     stop_pressed = False
     skip_frames = 0
+
+    st.markdown("""### Results:""")
 
     while True:
         if skip_frames > 0:
@@ -566,16 +649,74 @@ def detect_from_file(conf, video_file):
         outputs = session.run([output_name], {input_name: input_frame})
         detected_frame = postprocess(outputs, frame, original_size, conf, model=session)
 
-        for output_array in outputs:
+        new_detections = False  
+        detection_results = ""
+
+        for output_array in outputs:        
             for output in output_array[0]:
                 x1, y1, x2, y2, score, class_id = output[:6]
                 if score > conf:
                     if class_id < len(class_names):
-                        class_name = class_names[int(class_id)]
+                        class_name = class_names[int(class_id)]["name"]
                     label = f"{class_name}: {score:.2f}"
                     frames1.append(frame_count)
-                    food_names1.append(class_name)
-                    confidences1.append(score*100)
+                    confident = round(score*100)
+                    serving = class_names[int(class_id)]["serving_type"]
+
+                    if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
+                        detection_results += f"<b style='color: cyan;'>Class name:</b> {class_name}<br><b style='color: cyan;'>Confidence:</b> {confident}%<br>---<br>"
+                        displayed_dishes.add(class_name)
+                        new_detections = True
+                    elif class_name not in displayed_dishes:
+                        nutrition = class_names[int(class_id)]["nutrition"]
+                        if nutrition:
+                            displayed_dishes.add(class_name)
+                            new_detections = True
+                            nutrition_str = (
+                                f"Calories: {nutrition.get('Calories')} kcal, "
+                                f"Fat: {nutrition.get('Fat')} g, "
+                                f"Saturates: {nutrition.get('Saturates')} g, "
+                                f"Sugar: {nutrition.get('Sugar')} g, "
+                                f"Salt: {nutrition.get('Salt')} g"
+                            )
+
+                            detection_results += (
+                                f"<b style='color: cyan;'>Food name:</b> {class_name}<br>"
+                                f"<b style='color: cyan;'>Confidence:</b> {confident}%<br>"
+                                f"<b style='color: cyan;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
+                            )
+
+                            for key in total_nutrition:
+                                if key in nutrition:
+                                    total_nutrition[key] += nutrition[key]
+
+                        nutrition_data.append((
+                            class_name,
+                            serving,
+                            confident,
+                            nutrition.get('Calories'),
+                            nutrition.get('Fat'),
+                            nutrition.get('Saturates'),
+                            nutrition.get('Sugar'),
+                            nutrition.get('Salt')
+                        ))
+
+                    frames1.append(frame_count)
+
+        if new_detections:
+            scrollable_textbox = f"""
+                <div style="
+                    font-family: 'Source Code Pro','monospace';
+                    font-size: 16px;
+                    overflow-y: scroll;
+                    padding: 10px;
+                    width: auto;
+                    height: auto;
+                ">
+                    {detection_results}
+                </div>
+            """
+            st.markdown(scrollable_textbox, unsafe_allow_html=True)
 
         frame_count += 1
         elapsed_time = time.time() - start_time
@@ -596,15 +737,25 @@ def detect_from_file(conf, video_file):
 
     cap.release()
     out.release()
+    displayed_dishes.clear()
 
-    rows = zip(frames1, food_names1, confidences1)
+    total_nutrition_str = (
+                    f"<b style='color: cyan;'>Total Nutrition:</b> "
+                    f"Calories: {total_nutrition['Calories']:.1f} kcal, "
+                    f"Fat: {total_nutrition['Fat']:.1f} g, "
+                    f"Saturates: {total_nutrition['Saturates']:.1f} g, "
+                    f"Sugar: {total_nutrition['Sugar']:.1f} g, "
+                    f"Salt: {total_nutrition['Salt']:.1f} g<br>"
+                )
+    st.markdown(total_nutrition_str, unsafe_allow_html=True)
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
+    # with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir=tempfile.gettempdir()) as csv_file:
         csv_filename = csv_file.name
     with open(csv_filename, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["Frame", "Food Name(s)", "Confidence(%)"])
-        writer.writerows(rows)
+        writer.writerow(["Food Name", "Serving", "Confidence (%)", "Calories (kcal)", "Fat (g)", "Saturates (g)", "Sugar (g)", "Salt (g)"])
+        writer.writerows(nutrition_data)
     with open(csv_filename, "rb") as file:
         the_csv = file.read()
     
