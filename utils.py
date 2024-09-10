@@ -217,7 +217,7 @@ def detect_image_result(detected_image, model):
                     detection_results += (
                         f"<b style='color: cyan;'>Food name:</b> {class_name}<br>"
                         f"<b style='color: cyan;'>Confidence:</b> {conf}%<br>"
-                        f"<b style='color: cyan;'>Nutrition:</b> {nutrition_str}<br>---<br>"
+                        f"<b style='color: cyan;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
                     )
 
                     for key in total_nutrition:
