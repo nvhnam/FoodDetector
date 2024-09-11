@@ -30,6 +30,9 @@ st.set_page_config(
 # <h1 class="header-title">📑 About FoodDetector</h1>
 #             """, unsafe_allow_html=True)         
 
+st.markdown('''
+    <div id="top-section"></div>
+    ''', unsafe_allow_html=True)
 def img_to_base64(img_path):
     with open(img_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
@@ -308,7 +311,7 @@ def navbar(active_page):
     <div class="custom-navbar">
         <div class="nav-items">
             <a href="/main" target="_self" class="nav-item {'active' if active_page == 'Home' else ''}">🏠 Home</a>
-            <a href="#" target="_self" class="nav-item {'active' if active_page == 'About' else ''}">📄 About</a>
+            <a href="/dataset" target="_self" class="nav-item {'active' if active_page == 'About' else ''}">📄 About</a>
         </div>
         <a href="https://github.com/nvhnam/FoodDetector" target="_blank" class="nav-item">
             <svg id="github-icon" height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true">

@@ -269,7 +269,7 @@ def navbar(active_page):
     <div class="custom-navbar">
         <div class="nav-items">
             <a href="/main" target="_self" class="nav-item {'active' if active_page == 'Home' else ''}">🏠 Home</a>
-            <a href="#" target="_self" class="nav-item {'active' if active_page == 'About' else ''}">📄 About</a>
+            <a href="/dataset" target="_self" class="nav-item {'active' if active_page == 'About' else ''}">📄 About</a>
         </div>
         <a href="https://github.com/nvhnam/FoodDetector" target="_blank" class="nav-item">
             <svg id="github-icon" height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true">
