@@ -52,7 +52,7 @@ h4 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 1.5rem;
+    padding: 0 0 0 1.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .nav-items {
@@ -105,7 +105,7 @@ a.nav-item {
     font-size: 18px;
     /* border: none; */
     border-radius: 10px;
-    padding: 5px 12px;
+    padding: 5px 10px;
     font-size: calc(11px + 0.5vw);
     z-index: 99;
     text-decoration: none !important;
