@@ -602,97 +602,6 @@ class Detection(NamedTuple):
     confident: float
     serving: str
 
-@st.cache_resource  
-def generate_label_colors():
-    return np.random.uniform(0, 255, size=(len(class_names), 3))
-
-
-COLORS = generate_label_colors()
-
-# class VideoTransformer(VideoTransformerBase):
-#     def __init__(self, conf, model):
-#         self.conf = conf
-#         self.model = model
-#         self.prev_time = time.time()
-#         self.frame_count = 0
-
-#     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
-#         img = frame.to_ndarray(format="bgr24")
-#         mirrored_frame = cv2.flip(img, 1)
-#         results = self.model(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True, vid_stride=80)
-#         # results = self.model.track(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True)
-
-#         h, w = img.shape[:2]
-#         detections = [
-#             Detection(
-#                 class_id = int(detection[1]),
-#                 class_name = class_names[int(detection[1])]["name"],
-#                 confident = float(detection[2]),
-#                 serving = class_names[int(detection[1])]["serving_type"],
-#                 box=(detection[3:7] * np.array([w, h, w, h])),
-#             )
-#             for detection in results
-#         ]
-       
-
-
-#         # for r in results:
-#         #     im_bgr = r.plot()
-#             # for pred in r.boxes:
-#             #     class_id = int(pred.cls[0].item())
-#             #     class_name = class_names[int(class_id)]["name"]
-#             #     confident = int(round(pred.conf[0].item(), 2)*100)
-#             #     serving = class_names[int(class_id)]["serving_type"]
-
-                
-#             #     return class_id, class_name, confident, serving
-
-#         for detection in detections:
-#             caption = f"{detection.label}: {round(detection.score * 100, 2)}%"
-#             color = COLORS[detection.class_id]
-#             xmin, ymin, xmax, ymax = detection.box.astype("int")
-
-#             cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color, 2)
-#             cv2.putText(
-#                 img,
-#                 caption,
-#                 (xmin, ymin - 15 if ymin - 15 > 15 else ymin + 15),
-#                 cv2.FONT_HERSHEY_SIMPLEX,
-#                 0.5,
-#                 color,
-#                 2,
-#             )
-
-#         result_queue.put(detections)
-
-
-#         # im_rgb = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2RGB)
-        
-#         self.frame_count += 1
-#         current_time = time.time()
-#         elapsed_time = current_time - self.prev_time
-
-#         if elapsed_time >= 1.0:
-#             fps = self.frame_count / elapsed_time
-#             self.prev_time = current_time
-#             self.frame_count = 0
-#         else:
-#             fps = self.frame_count / elapsed_time
-  
-
-#         # cv2.putText(im_rgb, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-#         cv2.putText(img, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-#         # return av.VideoFrame.from_ndarray(im_rgb, format="rgb24")  
-
-#         return av.VideoFrame.from_ndarray(img, format="bgr24")
-
-
-        
-    
-
-
-
 class VideoTransformer(VideoTransformerBase):
     def __init__(self, conf, model):
         self.conf = conf
@@ -705,7 +614,6 @@ class VideoTransformer(VideoTransformerBase):
         mirrored_frame = cv2.flip(img, 1)
         results = self.model(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True, vid_stride=80)
         # results = self.model.track(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True)
-        h, w = img.shape[:2]
         for r in results:
             im_bgr = r.plot()
             for pred in r.boxes:
