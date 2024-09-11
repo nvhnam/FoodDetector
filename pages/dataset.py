@@ -12,9 +12,12 @@ def img_to_base64(img_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 # Convert your image to base64
-img_path = './assets/img/bg-about-cuisine.png'
+img_path = './assets/img/about-page.png'
 img_base64 = img_to_base64(img_path)
 
+st.markdown('''
+    <div id="top-section"></div>
+    ''', unsafe_allow_html=True)
 st.markdown(f"""
 <div class="header-container">
     <img src="data:image/jpg;base64,{img_base64}" class="header-image">
@@ -23,12 +26,90 @@ st.markdown(f"""
     </div>
 </div>
 """, unsafe_allow_html=True)
+    
+# Define the buttons with custom styling
+st.markdown("""
+ <div class="button-container">
+    <a href="#dataset-section" class="button about-section" onclick="smoothScroll(event, 'dataset-section')">Dataset</a>
+    <a href="#data-gathering-section" class="button about-section" onclick="smoothScroll(event, 'data-gathering-section')">Data Gathering</a>
+    <a href="#data-annotation-section" class="button about-section" onclick="smoothScroll(event, 'data-annotation-section')">Data Annotation</a>
+    <a href="#data-processing-section" class="button about-section" onclick="smoothScroll(event, 'data-processing-section')">Data Processing</a>
+    </div>
+    
+    <script>
+    function smoothScroll(event, targetId) {
+        event.preventDefault();
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+    </script>
+
+    <style>
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .button {
+            width: calc(25% - 5px);
+            display: inline-block;
+            padding: 5px;
+            background-color: var(--button-color-yellow);
+            color: black !important;
+            font-size: calc(12px + 0.3vw);
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            transition: 0.3s;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: var(--button-color-yellow-hover);
+            color: var(--grey-hover) !important;
+            text-decoration: none;
+        }
+        
+        @media screen and (max-width: 650px) {
+            .button {
+                width: calc(50% - 5px);
+                display: inline-block;
+                margin-bottom: 10px;
+                padding: 10px;
+                font-size: calc(12px + 0.4vw);
+            }
+        }
+        
+        @media screen and (max-width: 380px) {
+            .button {
+                width: calc(50% - 4px);
+                display: inline-block;
+                margin-bottom: 8px;
+                padding: 8px;
+                font-size: calc(10px + 0.4vw);
+            }
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+
 
 def render_content():  
     # st.title(":package: Dataset")
+    
+    st.markdown('''
+    <div id="dataset-section"></div>
+    ''', unsafe_allow_html=True)
     st.divider()
     st.markdown('''
-    <h4 class="dataset-page">VietFood57: A Dataset for Vietnamese Food Detection</h4>
+    <h4 id="dataset-section" class="dataset-page">VietFood57: A Dataset for Vietnamese Food Detection</h4>
     <ul class="define dataset-page">
         <li class="define-li dataset-page">This dataset contains <code>22,920</code> images with <code>58</code> classes which included an extra 
         class for recognizing human faces as the purpose of this research is to detect and monitor people eating activity so 
@@ -40,6 +121,8 @@ def render_content():
 
     ''', unsafe_allow_html=True)
     st.markdown('''<br>''', unsafe_allow_html=True)
+
+        
     markdown_table_1 = """
     | Class ID | Food Names                               |
     |----------|------------------------------------------|
@@ -116,9 +199,13 @@ def render_content():
 
     with col2:
         st.markdown(markdown_table_2)
+
+    st.markdown('''
+    <div id="data-gathering-section"></div>
+    ''', unsafe_allow_html=True)
     st.divider()
     st.markdown('''
-    <h4 class="dataset-page">🔍 Data Gathering 🔍</h4>
+    <h4 id="data-gathering-section" class="dataset-page">🔍 Data Gathering 🔍</h4>
     <p class="define dataset-page">These pictures were collected from different sources to ensure its variety and complexity.</p>
     <ul class="define dataset-page">
         <li class="define-li dataset-page"><code>Google, Facebook, Shopee Food</code>: Most of the images were gathered from these platforms by searching the dish name with some keyword like "food review" or "cooking".</li>
@@ -126,17 +213,25 @@ def render_content():
         <li class="define-li dataset-page"><code>Personal Collection</code>: Some images were personally taken by using a smartphone to simulate the real-world situation of food detection.</li>
     </ul>
     ''', unsafe_allow_html=True)
-
+    
+    
+    
+    st.markdown('''
+    <div id="data-annotation-section"></div>
+    ''', unsafe_allow_html=True)
     st.divider()
     st.markdown('''
-    <h4 class="dataset-page">✍️ Data Annotation ✍️</h4>
+    <h4  id="data-annotation-section" class="dataset-page">✍️ Data Annotation ✍️</h4>
     <p class="define dataset-page">The bounding box annotation and labeling process was done by using <a href="https://roboflow.com/" target="_blank">Roboflow</a> tools. To speed up the process, a YOLOv10m model 
     was trained on a subset of the dataset and used for the <code>Auto Label</code> feature to help automatically annotate the remaining images before double-checking it manually.</p>
     ''', unsafe_allow_html=True)
 
     st.divider()
     st.markdown('''
-    <h4 class="dataset-page">⚙️ Data Processing ⚙️</h4>
+    <div id="data-processing-section"></div>
+    ''', unsafe_allow_html=True)
+    st.markdown('''
+    <h4 id="data-processing-section" class="dataset-page">⚙️ Data Processing ⚙️</h4>
     <p class="define dataset-page">Some augmentation techniques were used to make sure the model can generalize well and to resolve the imbalance volume between classes.</p>
     <ul class="define dataset-page">
         <li class="define-li dataset-page"><code>Bounding box cropping</code>: Minimum zoom of <code>5%</code> and a maximum of <code>20%</code>.</li>
@@ -146,6 +241,23 @@ def render_content():
     </ul>
     <p class="define dataset-page">Overall, the total images obtained for training the model after the augmentation process are 66,593 images.</p>
     ''', unsafe_allow_html=True)
+        
+    st.markdown('''
+    <div>
+        <a href="#top-section" class="top-button" onclick="smoothScroll(event, 'top-section')">⬆</a>                
+    </div>
+    
+    <script>
+    function smoothScroll(event, targetId) {
+        event.preventDefault();
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+    </script>
+                ''', unsafe_allow_html=True)
+
 
 # Nav bar
 def navbar(active_page):
@@ -175,8 +287,9 @@ def styling_css():
 
 def main():
     styling_css()
+    
     query_params = st.query_params
-    path = query_params.get("page", ["home"])[0].lower()
+    path = query_params.get("page", ["about"])[0].lower()
     
     # Determine the active page
     active_page = 'About' if path == "about" else 'Home'
@@ -184,7 +297,7 @@ def main():
     # Always render the navbar with the correct active page
     st.markdown(navbar(active_page), unsafe_allow_html=True)
     
-    if path == "about":
+    if path == "home":
         st.markdown('<h1 style="color: white; font-size: 40px;">About Section</h1>', unsafe_allow_html=True)
         st.write("This is the About section. Here you can add information about your project or organization.")
     else:

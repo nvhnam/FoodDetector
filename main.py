@@ -281,6 +281,22 @@ def render_content():
                         if address:
                             detect_camera(confidence, model1, address="")
                             st.toast("Disconnected", icon="✅")
+    
+    st.markdown('''
+    <div>
+        <a href="#top-section" class="top-button" onclick="smoothScroll(event, 'top-section')">⬆</a>                
+    </div>
+    
+    <script>
+    function smoothScroll(event, targetId) {
+        event.preventDefault();
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+    </script>
+                ''', unsafe_allow_html=True)
 
 # Nav bar
 def navbar(active_page):

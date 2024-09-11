@@ -3,8 +3,10 @@
     --grey-light:#e8e8e8;
     --grey-lightest: #f4f4f4;
     --grey-code-expander: #959494;
+    --grey-hover: #686868;
     --white: #FFFFFF;
-    --button-color-yellor: #FEC51C; 
+    --button-color-yellow: #FEC51C; 
+    --button-color-yellow-hover: #fcd96b;
     --brown: #2C1100;
 }
 * {
@@ -60,16 +62,21 @@ h4 {
 .nav-item {
     color: white;
     text-decoration: none;
-    margin-right: 20px;
-    font-size: 16px;
+    margin-right: calc(15px + 0.3vw);
+    font-size: calc(10px + 0.4vw);
     display: flex;
     align-items: center;
     padding: 5px 10px;
     border-radius: 5px;
     transition: background-color 0.3s;
+    font-weight: 600;
+}
+a.nav-item {
+    color: white;
 }
 .nav-item:hover {
-    background-color: #2E2E2E;
+    background-color: var(--grey-hover);
+    text-decoration: none;
 }
 .nav-item.active {
     background-color: #4CAF50;
@@ -86,6 +93,33 @@ h4 {
 }
 
 /* END NAV BAR */
+
+
+/* SCROLL TOP BUTTON */
+.top-button {
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    background-color: var(--grey);
+    color: black !important;
+    font-size: 18px;
+    /* border: none; */
+    border-radius: 10px;
+    padding: 5px 12px;
+    font-size: calc(11px + 0.5vw);
+    z-index: 99;
+    text-decoration: none !important;
+    font-weight: 900;
+    color: white;
+}
+
+
+a.top-button:hover {
+    background-color: var(--grey-hover) !important;
+    color: white !important;
+}
+
+/* END SCROLL TOP BUTTON */
 
 /* GENERAL */
 .define {
@@ -105,6 +139,7 @@ hr {
     border-bottom: 1.2px solid rgba(0, 0, 0, 0.6);
 }
 /* END GENERAL */
+
 /* EXPANDER */
 [data-testid="stExpanderDetails"] ul li {
     font-size: calc(12px + 0.1vw);
@@ -118,7 +153,7 @@ hr {
     padding-left: 0.5rem;
 }
 .st-emotion-cache-1h9usn1 {
-    background-color: var(--button-color-yellor);
+    background-color: var(--button-color-yellow) !important;
     font-size: calc(16px +1vw);
 }
 
