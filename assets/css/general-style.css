@@ -42,6 +42,11 @@ h4 {
     margin-bottom: 1rem;
     font-size: calc(1.275rem + .3vw);
 }
+
+h5 {
+    padding: 0.5rem 0;
+    font-size: calc(1rem + .3vw);
+}
 /* NAV BAR */
 #MainMenu, header, footer {
     visibility: hidden;
@@ -272,4 +277,122 @@ h4.dataset-page {
     .header-subtitle {
         font-size: calc(2px + 3vw);
     }
+}
+
+.total-nutrition-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    background-color: var(--grey-light);
+    padding: calc(5px + 0.6vw);
+    border-radius: 10px;
+}
+
+.total-nutri-box {
+    display: block;
+    background-color: white;
+    padding: calc(2px + 0.5vw);
+    border-radius: 5px;
+    text-align: center;
+    width: calc(20% - 8px);
+    align-content: center;
+}
+
+.total-nutri-value-name{
+    font-size: calc(9px + 0.2vw);
+}
+
+.total-nutri-num{
+    font-size: calc(13px + 0.5vw);
+    font-weight: 700;
+}
+
+#calo-box {
+    border: 1px solid black;
+}
+
+.total-count-result {
+    font-size: calc(10px + 0.5vw);
+    font-weight: 600;
+    background-color: var(--grey-light);
+    padding: 1rem 0 1rem 1rem;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+/* EACH NUTRITION VALUE */
+.each-nutri-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: calc(1.7rem + 0.3vw);
+    gap: 7px;
+}
+
+.each-nutri-box {
+    padding: 2px;
+    padding-bottom: calc(6px + 0.3vw);
+    border-radius: 23px;
+    text-align: center;
+    width: 12%;
+    min-width: 100px;
+    background-color: transparent;
+}
+.each-nutri-name {
+    font-size: calc(7px + 0.2vw);
+    font-weight: 400;
+}
+
+.each-nutri-number {
+    font-size: calc(14px + 0.2vw);
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.each-nutri-percentage{
+    font-size: calc(9px + 0.2vw);
+    font-weight: 500;
+    background-color: white;
+    padding: 5px 25px;
+    border-radius: 20px;
+}
+
+.item-header {
+    font-size: calc(12px + 0.2vw);
+    margin-bottom: 5px;
+    margin-top: calc(1rem + 0.3vw);
+}
+
+.nutrition-header {
+    background-color: var(--grey);
+    padding: 2px 8px;
+    border-radius: 7px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    display: inline-block;
+    color: black;
+    font-size: calc(12px + 0.2vw);
+}
+
+#calo-each-nutri-box {
+    background-color: white !important;
+}
+#calo-each-nutri-percentage {
+    border: 1px solid black;
+}
+
+#result-nutri-container {
+    background-color: var(--grey-light);
+    padding: 0rem 1rem;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 0.6rem;
+}
+
+/* NO FOOD */
+#no-food {
+
+}
+
+#no-food-descr {
+    
 }

@@ -24,6 +24,10 @@ import plotly.graph_objects as go
 
 from class_names import class_names
 
+def styling_css():
+    with open('./assets/css/general-style.css') as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+        
 def create_fig(image, detected=False):
 
     if not isinstance(image, Image.Image):
@@ -239,81 +243,86 @@ def load_model():
 def resize_image(image):
     return image.resize((640, 640))
 
+# Define color variables
+COLOR_HIGH = "#FF4A3F"    # Red for high values
+COLOR_MEDIUM = "#FECB02"  # Yellow for medium values
+COLOR_LOW = "#85BB2F"     # Green for low values
 
 def get_nutri_score_color(nutrient, value, serving_type):
     if serving_type == "per 100g":
         if nutrient == "Calories":
             if value < 100:
-                return "Low"
+                return COLOR_LOW, "Low"
             elif value < 200:
-                return "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "High"
+                return COLOR_HIGH, "High"
         elif nutrient == "Fat":
             if value < 3:
-                return "green", "Low"
+                return COLOR_LOW, "Low"
             elif value < 17.5:
-                return "yellow", "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "red", "High"
+                return COLOR_HIGH, "High"
         elif nutrient == "Saturates":
             if value < 1.5:
-                return "green", "Low"
+                return COLOR_LOW, "Low"
             elif value < 5:
-                return "yellow", "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "red", "High"
+                return COLOR_HIGH, "High"
         elif nutrient == "Sugar":
             if value < 5:
-                return "green", "Low"
+                return COLOR_LOW, "Low"
             elif value < 22.5:
-                return "yellow", "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "red", "High"
+                return COLOR_HIGH, "High"
         elif nutrient == "Salt":
             if value < 0.3:
-                return "green", "Low"
+                return COLOR_LOW, "Low"
             elif value < 1.5:
-                return "yellow", "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "red", "High"
+                return COLOR_HIGH, "High"
    
     elif serving_type == "1 serving":
         if nutrient == "Calories":
             if value < 150:
-                return "Low"
+                return COLOR_LOW, "Low"
             elif value < 300:
-                return "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "High"
+                return COLOR_HIGH, "High"
         elif nutrient == "Fat":
             if value < 5:
-                return "green", "Low"
+                return COLOR_LOW, "Low"
             elif value < 21:
-                return "yellow", "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "red", "High"
+                return COLOR_HIGH, "High"
         elif nutrient == "Saturates":
             if value < 2:
-                return "green", "Low"
+                return COLOR_LOW, "Low"
             elif value < 6:
-                return "yellow", "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "red", "High"
+                return COLOR_HIGH, "High"
         elif nutrient == "Sugar":
             if value < 6:
-                return "green", "Low"
+                return COLOR_LOW, "Low"
             elif value < 27:
-                return "yellow", "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "red", "High"
+                return COLOR_HIGH, "High"
         elif nutrient == "Salt":
             if value < 0.4:
-                return "green", "Low"
+                return COLOR_LOW, "Low"
             elif value < 1.8:
-                return "yellow", "Medium"
+                return COLOR_MEDIUM, "Medium"
             else:
-                return "red", "High"
+                return COLOR_HIGH, "High"
+
 
 def calculate_nutrient_percentage(nutrition):
     total_nutrition_value = (
@@ -400,41 +409,42 @@ def detect_image_result(detected_image, model):
 
 
                         nutrition_str = f"""
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px">
-                                <div style="background-color: transparent; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                                    <span><b>Calories:</b></span><br>
-                                    <span>{nutrition.get('Calories')} kcal</span><br>
-                                    <span>{percentage_contribution['Calories']:.1f}%</span>
-                                </div>
-                                <div style="background-color: {fat_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                                    <span><b>Fat:</b></span><br>
-                                    <span>{nutrition.get('Fat')} g</span><br>
-                                    <span>{percentage_contribution['Fat']:.1f}%</span>
-                                </div>
-                                <div style="background-color: {saturates_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                                    <span><b>Saturates:</b></span><br>
-                                    <span>{nutrition.get('Saturates')} g</span><br>
-                                    <span>{percentage_contribution['Saturates']:.1f}%</span>
-                                </div>
-                                <div style="background-color: {sugar_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                                    <span><b>Sugar:</b></span><br>
-                                    <span>{nutrition.get('Sugar')} g</span><br>
-                                    <span>{percentage_contribution['Sugar']:.1f}%</span>
-                                </div>
-                                <div style="background-color: {salt_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                                    <span><b>Salt:</b></span><br>
-                                    <span>{nutrition.get('Salt')} g</span><br>
-                                    <span>{percentage_contribution['Salt']:.1f}%</span>
-                                </div>
-                            </div>
+<div class="each-nutri-container">
+    <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
+        <span class="each-nutri-name">Calories</span><br>
+        <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
+        <span id="calo-each-nutri-percentage" class="each-nutri-percentage">{percentage_contribution['Calories']:.1f}%</span>
+    </div>
+    <div class="each-nutri-box" style="background-color: {fat_color};">
+        <span class="each-nutri-name">Fat</span><br>
+        <p class="each-nutri-number">{nutrition.get('Fat')} gram</p>
+        <span class="each-nutri-percentage">{percentage_contribution['Fat']:.1f}%</span>
+    </div>
+    <div class="each-nutri-box" style="background-color: {saturates_color};">
+        <span class="each-nutri-name">Saturates</span><br>
+        <p class="each-nutri-number">{nutrition.get('Saturates')} gram</p>
+        <span class="each-nutri-percentage">{percentage_contribution['Saturates']:.1f}%</span>
+    </div>
+    <div class="each-nutri-box" style="background-color: {sugar_color};">
+        <span class="each-nutri-name">Sugar</span><br>
+        <p class="each-nutri-number">{nutrition.get('Sugar')} gram</p>
+        <span class="each-nutri-percentage">{percentage_contribution['Sugar']:.1f}%</span>
+    </div>
+    <div class="each-nutri-box" style="background-color: {salt_color};">
+        <span class="each-nutri-name">Salt</span><br>
+        <p class="each-nutri-number">{nutrition.get('Salt')} gram</p>
+        <span class="each-nutri-percentage">{percentage_contribution['Salt']:.1f}%</span>
+    </div>
+</div>
                             """
 
 
                     detection_results += (
-                        f"<b style='color: black;'>{count_dict[class_id]} ({conf}%):</b> {class_name}<br>"
-                        f"<div style='color: black; font-weight: bold; background_color:gray'>Nutrition ({serving})</div>"
-                        f"<div style='color: black; font-weight: bold;'>{nutrition_str}</div>"
-                    )
+                    f"""<p class="item-header"><b>{count_dict[class_id]} ({conf}%):</b> {class_name}</p>
+                    <p class="nutrition-header">Nutrition ({serving})</p>
+                    <p class="nutrition-facts">{nutrition_str}</p>
+                    <hr style="border: none; border-top: 1px dashed black; width: 80%;">
+                    """)
 
                     for key in total_nutrition:
                         if key in nutrition:
@@ -452,29 +462,31 @@ def detect_image_result(detected_image, model):
                     ))
 
             total_nutrition_str = f"""
-                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                        <span><b>Calories</b></span><br>
-                        <span>{total_nutrition['Calories']:.1f} kcal</span>
-                    </div>
-                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                        <span><b>Fat</b></span><br>
-                        <span>{total_nutrition['Fat']:.1f} g</span>
-                    </div>
-                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                        <span><b>Saturates</b></span><br>
-                        <span>{total_nutrition['Saturates']:.1f} g</span>
-                    </div>
+    <h5 class="total-nutrition-title">Total Nutrition Values</h5>
+    <div class="total-nutrition-container">
+        <div class="total-nutri-box" id="calo-box">
+            <span class="total-nutri-num">{total_nutrition['Calories']:.1f} kcal</span><br>
+            <span class="total-nutri-value-name">Calories</span>
+        </div>
         <div class="total-nutri-box">
-            <span class="total-nutri-num">{total_nutrition['Sugar']:.1f} gram</span>
+            <span class="total-nutri-num">{total_nutrition['Fat']:.1f} gram</span><br>
+            <span class="total-nutri-value-name">Fat</span>
+        </div>
+        <div class="total-nutri-box">
+            <span class="total-nutri-num">{total_nutrition['Saturates']:.1f} gram</span><br>
+            <span class="total-nutri-value-name">Saturates</span>
+        </div>
+        <div class="total-nutri-box">
+            <span class="total-nutri-num">{total_nutrition['Sugar']:.1f} gram</span><br>
             <span class="total-nutri-value-name">Sugar</span>
         </div>
-                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                        <span><b>Salt</b></span><br>
-                        <span>{total_nutrition['Salt']:.1f} g</span>
-                    </div>
-                </div>
-                """
+        <div class="total-nutri-box">
+            <span class="total-nutri-num">{total_nutrition['Salt']:.1f} gram</span><br>
+            <span class="total-nutri-value-name">Salt</span>
+        </div>
+    </div>
+"""
+
 
             # detection_results += total_nutrition_str
             total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
@@ -483,24 +495,14 @@ def detect_image_result(detected_image, model):
                 the_name = class_names[object_type]["name"]
                 counts.append(count)
                 # detection_results += f"<b style='color: black;'>Count of {the_name}:</b> {count}<br>"
-                count_results += f"<b style='color: black;'>{the_name}:</b> {count}<br>"
+                count_results += f"""
+                <p class="total-count-result">{the_name}: {count}</p>"""
                 
 
-            scrollable_textbox = f"""
-                <div style="
-                    font-family: 'Source Code Pro','monospace';
-                    font-size: 16px;
-                    overflow-y: scroll;
-                    padding: 10px;
-                    width: auto;
-                    height: 400px;
-                    margin: 20px;
-                ">
-                    {detection_results}
-                </div>
-            """
-
-            st.markdown("""### Results:""")
+            scrollable_textbox = f"""<div id="result-nutri-container">{detection_results}</div>"""
+            
+            st.markdown("""<br>
+                        <h5>Results:</h5>""", unsafe_allow_html=True)
             
             st.markdown(count_results, unsafe_allow_html=True)
             st.markdown(scrollable_textbox, unsafe_allow_html=True)
@@ -536,12 +538,12 @@ def detect_image_result(detected_image, model):
         st.divider()
 
     else:
-        st.markdown("""### No food detected""")
-        st.markdown("""
-            The model did not detect any foods in the uploaded image.  
+        st.markdown("""<h5 id="no-food">No food detected</h5>
+                    <p id="no-food-descr">The model did not detect any foods in the uploaded image.  
             Please try with a different image or adjust the model's 
-            confidence threshold and try again.
-        """)
+            confidence threshold and try again.</p>
+                    """, unsafe_allow_html=True)
+        
 
 
 def detect_image(conf, uploaded_file, model, url=False):
