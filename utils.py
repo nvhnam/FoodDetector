@@ -341,7 +341,6 @@ def detect_image_result(detected_image, model):
     if boxes:
         detected_img_arr_RGB = detected_image[0].plot()[:, :, ::1]
         detected_img_arr_BGR = detected_image[0].plot()[:, :, ::-1]
-
         fig_detected = create_fig(detected_img_arr_BGR, detected=True)
         st.plotly_chart(fig_detected, use_container_width=True)
 
@@ -354,9 +353,9 @@ def detect_image_result(detected_image, model):
             cv2.imwrite(img_filename, detected_img_arr_RGB)
         with open(img_filename, 'rb') as file:
             the_img = file.read()
-
-            st.markdown("**Predicted Image**")
+        
             detection_results = ""
+            count_results = ""
             count_dict = {}
             food_names = []
             nutrition_data = []
@@ -370,6 +369,8 @@ def detect_image_result(detected_image, model):
                 "Salt": 0
             }
 
+            total_nutrition_placeholder = st.empty()
+
             for box in boxes:
                 # class_id = model.names[box.cls[0].item()]
                 class_id = int(box.cls[0].item())
@@ -378,6 +379,11 @@ def detect_image_result(detected_image, model):
                 conf = int(round(box.conf[0].item(), 2)*100)
                 confidences.append(conf)
                 serving = class_names[int(class_id)]["serving_type"]
+
+                if class_id in count_dict:
+                    count_dict[class_id] += 1
+                else:
+                    count_dict[class_id] = 1
 
                 if class_name == "Con nguoi (Human)":
                     detection_results += f"<b style='color: black;'>Class name:</b> {class_name}<br><b style='color: black;'>Confidence:</b> {conf}%<br>---<br>"
@@ -393,18 +399,41 @@ def detect_image_result(detected_image, model):
                         percentage_contribution = calculate_nutrient_percentage(nutrition)
 
 
-                        nutrition_str = (
-                            f"<span>Calories: {nutrition.get('Calories')} kcal ({percentage_contribution['Calories']:.1f}%) - {calories_desc}</span>, "
-                            f"<span style='color: {fat_color};'>Fat: {nutrition.get('Fat')} g ({percentage_contribution['Fat']:.1f}%) - {fat_desc}</span>, "
-                            f"<span style='color: {saturates_color};'>Saturates: {nutrition.get('Saturates')} g ({percentage_contribution['Saturates']:.1f}%) - {saturates_desc}</span>, "
-                            f"<span style='color: {sugar_color};'>Sugar: {nutrition.get('Sugar')} g ({percentage_contribution['Sugar']:.1f}%) - {sugar_desc}</span>, "
-                            f"<span style='color: {salt_color};'>Salt: {nutrition.get('Salt')} g ({percentage_contribution['Salt']:.1f}%) - {salt_desc}</span>"
-                        )
+                        nutrition_str = f"""
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px">
+                                <div style="background-color: transparent; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Calories:</b></span><br>
+                                    <span>{nutrition.get('Calories')} kcal</span><br>
+                                    <span>{percentage_contribution['Calories']:.1f}%</span>
+                                </div>
+                                <div style="background-color: {fat_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Fat:</b></span><br>
+                                    <span>{nutrition.get('Fat')} g</span><br>
+                                    <span>{percentage_contribution['Fat']:.1f}%</span>
+                                </div>
+                                <div style="background-color: {saturates_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Saturates:</b></span><br>
+                                    <span>{nutrition.get('Saturates')} g</span><br>
+                                    <span>{percentage_contribution['Saturates']:.1f}%</span>
+                                </div>
+                                <div style="background-color: {sugar_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Sugar:</b></span><br>
+                                    <span>{nutrition.get('Sugar')} g</span><br>
+                                    <span>{percentage_contribution['Sugar']:.1f}%</span>
+                                </div>
+                                <div style="background-color: {salt_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Salt:</b></span><br>
+                                    <span>{nutrition.get('Salt')} g</span><br>
+                                    <span>{percentage_contribution['Salt']:.1f}%</span>
+                                </div>
+                            </div>
+                            """
+
 
                     detection_results += (
-                        f"<b style='color: black;'>Food name:</b> {class_name}<br>"
-                        f"<b style='color: black;'>Confidence:</b> {conf}%<br>"
-                        f"<b style='color: black;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
+                        f"<b style='color: black;'>{count_dict[class_id]} ({conf}%):</b> {class_name}<br>"
+                        f"<div style='color: black; font-weight: bold; background_color:gray'>Nutrition ({serving})</div>"
+                        f"<div style='color: black; font-weight: bold;'>{nutrition_str}</div>"
                     )
 
                     for key in total_nutrition:
@@ -422,25 +451,40 @@ def detect_image_result(detected_image, model):
                         nutrition.get('Salt')
                     ))
 
-                if class_id in count_dict:
-                    count_dict[class_id] += 1
-                else:
-                    count_dict[class_id] = 1
+            total_nutrition_str = f"""
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Calories</b></span><br>
+                        <span>{total_nutrition['Calories']:.1f} kcal</span>
+                    </div>
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Fat</b></span><br>
+                        <span>{total_nutrition['Fat']:.1f} g</span>
+                    </div>
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Saturates</b></span><br>
+                        <span>{total_nutrition['Saturates']:.1f} g</span>
+                    </div>
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Sugar</b></span><br>
+                        <span>{total_nutrition['Sugar']:.1f} g</span>
+                    </div>
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Salt</b></span><br>
+                        <span>{total_nutrition['Salt']:.1f} g</span>
+                    </div>
+                </div>
+                """
 
-            total_nutrition_str = (
-                f"<b style='color: black;'>Total Nutrition:</b> "
-                f"Calories: {total_nutrition['Calories']:.1f} kcal, "
-                f"Fat: {total_nutrition['Fat']:.1f} g, "
-                f"Saturates: {total_nutrition['Saturates']:.1f} g, "
-                f"Sugar: {total_nutrition['Sugar']:.1f} g, "
-                f"Salt: {total_nutrition['Salt']:.1f} g<br>"
-            )
-            detection_results += total_nutrition_str
+            # detection_results += total_nutrition_str
+            total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
 
             for object_type, count in count_dict.items():
                 the_name = class_names[object_type]["name"]
                 counts.append(count)
-                detection_results += f"<b style='color: black;'>Count of {the_name}:</b> {count}<br>"
+                # detection_results += f"<b style='color: black;'>Count of {the_name}:</b> {count}<br>"
+                count_results += f"<b style='color: black;'>{the_name}:</b> {count}<br>"
+                
 
             scrollable_textbox = f"""
                 <div style="
@@ -450,12 +494,15 @@ def detect_image_result(detected_image, model):
                     padding: 10px;
                     width: auto;
                     height: 400px;
+                    margin: 20px;
                 ">
                     {detection_results}
                 </div>
             """
 
             st.markdown("""### Results:""")
+            
+            st.markdown(count_results, unsafe_allow_html=True)
             st.markdown(scrollable_textbox, unsafe_allow_html=True)
 
             # rows = zip(food_names, confidences, counts)
@@ -496,11 +543,14 @@ def detect_image_result(detected_image, model):
             confidence threshold and try again.
         """)
 
-# @st.fragment
+
 def detect_image(conf, uploaded_file, model, url=False):
     if uploaded_file is not None:
         if "button_clicked" not in st.session_state:
             st.session_state.button_clicked = False
+        
+        if "is_reset" not in st.session_state:
+            st.session_state.is_reset = False
         
         if "show_image" not in st.session_state:
             st.session_state.show_image = True
@@ -510,8 +560,9 @@ def detect_image(conf, uploaded_file, model, url=False):
         
         def toggle_button(reset = False):
             st.session_state.button_clicked = not st.session_state.button_clicked
+            st.session_state.show_image = not st.session_state.show_image
             if reset == True:
-                st.session_state.show_image = not st.session_state.show_image
+                st.session_state.is_reset = not st.session_state.is_reset
         
         if url==False:
             uploaded_image = Image.open(uploaded_file)
@@ -522,21 +573,26 @@ def detect_image(conf, uploaded_file, model, url=False):
 
         resized_uploaded_image = resize_image(uploaded_image)
 
-        if not st.session_state.show_image :
-            original_image = st.empty()
-            
-            st.session_state.show_image = True
-        else: 
+        original_image = st.empty()
+
+        if st.session_state.show_image and not st.session_state.is_reset and not st.session_state.button_clicked:   
             original_image = st.image(resized_uploaded_image, output_format="JPEG", use_column_width=True)
+
+        if not st.session_state.is_reset:
             col1, col2 = st.columns([0.8, 0.2], gap="large")
             with col1:
-                st.markdown("**Original Image**")
+                if st.session_state.show_image and not st.session_state.button_clicked and not original_image == st.empty():
+                    st.markdown("**Original Image**")
+                elif not st.session_state.show_image and st.session_state.button_clicked:
+                    st.markdown("**Predicted Image**")
             with col2:
                 if not st.session_state.button_clicked:
                     predict_button = st.button("Predict", use_container_width=True, type="primary", on_click=toggle_button)
                 else:
                     reset_button = st.button("Reset", use_container_width=True, type="primary", on_click=toggle_button, args=[True])
                     uploaded_file = None
+        if st.session_state.show_image and st.session_state.is_reset and not st.session_state.button_clicked:
+            st.session_state.is_reset = False
 
         if st.session_state.button_clicked and not reset_button:
             with st.spinner("Running..."):
@@ -662,14 +718,31 @@ def detect_camera(conf, model, address):
                         </div>
                     """
                     st.markdown(scrollable_textbox, unsafe_allow_html=True)
-                total_nutrition_str = (
-                    f"<b style='color: black;'>Total Nutrition:</b> "
-                    f"Calories: {total_nutrition['Calories']:.1f} kcal, "
-                    f"Fat: {total_nutrition['Fat']:.1f} g, "
-                    f"Saturates: {total_nutrition['Saturates']:.1f} g, "
-                    f"Sugar: {total_nutrition['Sugar']:.1f} g, "
-                    f"Salt: {total_nutrition['Salt']:.1f} g<br>"
-                )
+                total_nutrition_str = f"""
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Calories:</b></span><br>
+                            <span>{total_nutrition['Calories']:.1f} kcal</span>
+                        </div>
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Fat:</b></span><br>
+                            <span>{total_nutrition['Fat']:.1f} g</span>
+                        </div>
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Saturates:</b></span><br>
+                            <span>{total_nutrition['Saturates']:.1f} g</span>
+                        </div>
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Sugar:</b></span><br>
+                            <span>{total_nutrition['Sugar']:.1f} g</span>
+                        </div>
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Salt:</b></span><br>
+                            <span>{total_nutrition['Salt']:.1f} g</span>
+                        </div>
+                    </div>
+                    """
+
                 total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
             else:
                 break
