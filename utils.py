@@ -465,10 +465,10 @@ def detect_image_result(detected_image, model):
                         <span><b>Saturates</b></span><br>
                         <span>{total_nutrition['Saturates']:.1f} g</span>
                     </div>
-                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
-                        <span><b>Sugar</b></span><br>
-                        <span>{total_nutrition['Sugar']:.1f} g</span>
-                    </div>
+        <div class="total-nutri-box">
+            <span class="total-nutri-num">{total_nutrition['Sugar']:.1f} gram</span>
+            <span class="total-nutri-value-name">Sugar</span>
+        </div>
                     <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
                         <span><b>Salt</b></span><br>
                         <span>{total_nutrition['Salt']:.1f} g</span>
