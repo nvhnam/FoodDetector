@@ -41,6 +41,10 @@ def img_to_base64(img_path):
 img_path = './assets/img/bg-about-cuisine.png'
 img_base64 = img_to_base64(img_path)
 
+# Convert your image to base64
+img_path_nutrition = './assets/img/nutrition-table.png'
+img_base64_nutrition = img_to_base64(img_path_nutrition)
+
 st.markdown(f"""
 <div class="header-container">
     <img src="data:image/jpg;base64,{img_base64}" class="header-image">
@@ -102,8 +106,6 @@ st.markdown(f"""
 # End Cover
 
 def render_content():         
-    confidence = 0.5
-
     with st.container():
         # st.title("Welcome to _:green[FoodDetector]_ :male-detective:")
         st.divider()
@@ -114,10 +116,10 @@ def render_content():
     # ''', unsafe_allow_html=True)
 
         st.markdown(f'''
-    <ul class="define">
-        <li class="define-li">FoodDetector uses the <strong>YOLOv10m</strong> pretrained models for fine-tuning with <code>VietFood57</code>, 
+    <ul class="define introduction" style="margin-top: 0; margin-bottom: 0;">
+        <li class="define-li home-page">FoodDetector uses the <strong>YOLOv10m</strong> pretrained models for fine-tuning with <code>VietFood57</code>, 
         a new custom-made Vietnamese food dataset created for detecting local dishes and achieved a <code>mAP50</code> of <code>0.934</code>.</li>
-        <li class="define-li">It can be used to detect <a href="/dataset" target="_self">57</a> Vietnamese dishes from a picture, video, webcam, and an IP camera through RTSP.</li>
+        <li class="define-li home-page">It can be used to detect <a href="/dataset" target="_self">57</a> Vietnamese dishes from a picture, video, webcam, and an IP camera through RTSP.</li>
     </ul>
                     ''', unsafe_allow_html=True)
 
@@ -125,12 +127,21 @@ def render_content():
         st.divider()
 
         st.markdown(f'''
-
+                    <h4>Adjust the confident score 🚩</h4>
+                    ''', unsafe_allow_html=True)
+        confidence = float(st.slider(
+            label="",label_visibility="collapsed", min_value=10, max_value=100, value=50 
+        ))/ 100
+        
+        st.markdown(f'''
     <style>
         #quick-note {{
         margin-left: 0;
-        margin-top: 0.5rem;
         margin-bottom: 0.5rem;
+    }}
+    
+    p#quick-note.define {{
+        margin-top: 0;
     }}
 
     .title-text-score {{
@@ -141,8 +152,11 @@ def render_content():
         display: inline;
     }}
 
+    p.define.subtitle-text-score {{
+        margin-bottom: 0.5rem;
+    }}
+    
     </style>
-    <h4>Adjust the confident score 🚩</h4>
     <p class="define" id="quick-note"><strong>Quick note 📝</strong>: consideration for selecting the best suited confident score:</p>
     <div class="adjust-section">
         <p class="define title-text-score">High confident score (>= 50%):</p>
@@ -154,7 +168,72 @@ def render_content():
     </div>     
                 ''', unsafe_allow_html=True)
 
+        st.divider()
+        st.markdown(f'''
+                    <h4>Nutrition value score📊</h4>
+                    ''', unsafe_allow_html=True)
 
+        st.markdown(f'''
+    <ul class="define nutrition" style="margin-top: 0; margin-bottom: 0;">
+        <li class="define-li home-page">Our nutrition values are based on the <strong>Traffic Light system</strong>🚦.</li>
+        <li class="define-li home-page">All nutrition information provided is approximate.</li>
+    </ul>
+                    ''', unsafe_allow_html=True)
+        
+
+        
+        expander = st.expander("See more")  
+        expander.write(f'''
+<div class="nutrition-container">
+    <img src="data:image/jpg;base64,{img_base64_nutrition}" class="nutrition-img">
+    <ul class="nutrition-explain">
+        <li class="nutrition-explain-details"><strong class="color-section" id="green">Green (Low)</strong>: Very healthy. Enjoy without worry.</li>
+        <li class="nutrition-explain-details"><strong class="color-section" id="yellow">Yellow (Medium)</strong>: Consume in moderation or combine with healthier options.</li>
+        <li class="nutrition-explain-details"><strong class="color-section" id="red">Red (High)</strong>: Limit consumption and look for healthier alternatives.</li>
+    </ul>
+    <p class="nutrition-explain-details">For more information, please refer to the <a href="https://www.nutricalc.co.uk/case-study/case-study-uk-traffic-light-front-of-pack-colour-thresholds/">NutriCalc</a>,
+    <a href="https://heas.health.vic.gov.au/resources/government-guidelines/traffic-light-system/">Healthy Eating Advisory Service</a></p>
+
+<style>
+    li.nutrition-explain-details {{
+        margin-bottom: 0.5rem !important;
+        margin-top: 0.5rem !important;
+    }}
+    
+    p.nutrition-explain-details {{
+        font-weight: 400 !important;
+        margin: 1rem 0 !important;
+    }}
+    
+    img.nutrition-img {{
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        width: 90%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }} 
+    
+    .color-section {{
+        padding: 3px 6px;
+        border-radius: 5px;
+    }}
+    
+    #green {{
+        background-color: var(--green-nu);
+    }}
+    
+    #yellow {{
+        background-color: var(--yellow-nu);
+    }}
+    
+    #red {{
+        background-color: var(--red-nu);
+    }}
+</style>
+''', unsafe_allow_html=True)
+        
+        st.markdown(f'''<br><br>''', unsafe_allow_html=True)        
         model1 = load_model()
         model = load_onnx_model()
 
@@ -166,7 +245,6 @@ def render_content():
             # Accordion
             expander = st.expander("Instructions: Image upload and URL")  
             expander.write('''
-
     - Uploading image files from the user's local machine or using an image URL is supported.
     - After the prediction process, two buttons will appear to download the results as an image file with bounding boxes or a CSV file.
     - The results are generated when the user clicks the button and are named in the format: `"%date-%month-%year_%hour-%minute".jpg/csv`.

@@ -8,6 +8,9 @@
     --button-color-yellow: #FEC51C; 
     --button-color-yellow-hover: #fcd96b;
     --brown: #2C1100;
+    --green-nu: #85bb2f;
+    --yellow-nu: #fecb02;
+    --red-nu: #fb4d44;
 }
 * {
     font-family: 'Montserrat', sans-serif !important;
@@ -35,6 +38,9 @@ small {
 
 h4 {
     padding: 0;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: calc(1.275rem + .3vw);
 }
 /* NAV BAR */
 #MainMenu, header, footer {
@@ -136,7 +142,7 @@ a.top-button:hover {
 hr {
     margin-top: 1.5rem;
     margin-bottom: 1.3rem;
-    border-bottom: 1.2px solid rgba(0, 0, 0, 0.6);
+    border-bottom: 1.1px solid rgba(0, 0, 0, 0.6);
 }
 /* END GENERAL */
 
@@ -170,6 +176,12 @@ hr {
 }
 /* END EXPANDER */
 
+/* HOME */
+
+/* END HOME */
+li.define-li.home-page {
+    margin: 0.6rem 0;
+}
 /* DATASET */
 p.define.dataset-page {
     margin-left: 0;
