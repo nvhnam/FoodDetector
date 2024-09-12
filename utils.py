@@ -568,13 +568,33 @@ def detect_camera(conf, model, address):
             return
     try: 
         st_frame = st.empty()
+
+        displayed_dishes = set()
+
+        total_nutrition = {
+            "Calories": 0,
+            "Fat": 0,
+            "Saturates": 0,
+            "Sugar": 0,
+            "Salt": 0
+        }
+
+        st.markdown("""### Results:""")
+
+        total_nutrition_placeholder = st.empty()
+
         frame_count = 0
         start_time = time.time()
         while True:   
             success, image = vid_cap.read()
             if success:
-                mirrored_frame = cv2.flip(image, 1)
+                # mirrored_frame = cv2.flip(image, 1)
                 results = model.track(source=image, conf=conf, imgsz=640, save=False, device="cpu", stream=True)
+
+
+                new_detections = False  
+                detection_results = ""
+
                 for r in results:
                     im_bgr = r.plot()
                     frame_count += 1
@@ -586,15 +606,81 @@ def detect_camera(conf, model, address):
                     cv2.putText(im_bgr, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2) 
                     im_rgb = Image.fromarray(im_bgr[..., ::-1])
                     st_frame.image(im_rgb, caption='Camera IP', use_column_width=True)
+
+                    for pred in r.boxes:
+                        class_id = int(pred.cls[0].item())
+                        class_name = class_names[int(class_id)]["name"]
+                        confident = int(round(pred.conf[0].item(), 2)*100)
+                        serving = class_names[int(class_id)]["serving_type"]
+
+                        if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
+                            detection_results += f"<b style='color: black;'>Class name:</b> {class_name}<br><b style='color: black;'>Confidence:</b> {confident}%<br>---<br>"
+                            displayed_dishes.add(class_name)
+                            new_detections = True
+                        elif class_name not in displayed_dishes:
+                            nutrition = class_names[int(class_id)]["nutrition"]
+                            if nutrition:
+                                displayed_dishes.add(class_name)
+                                new_detections = True
+
+                                calories_desc = get_nutri_score_color("Calories", nutrition.get('Calories'), serving)
+                                fat_color, fat_desc = get_nutri_score_color("Fat", nutrition.get('Fat'), serving)
+                                saturates_color, saturates_desc = get_nutri_score_color("Saturates", nutrition.get('Saturates'), serving)
+                                sugar_color, sugar_desc = get_nutri_score_color("Sugar", nutrition.get('Sugar'), serving)
+                                salt_color, salt_desc = get_nutri_score_color("Salt", nutrition.get('Salt'), serving)
+
+                                percentage_contribution = calculate_nutrient_percentage(nutrition)
+
+                                nutrition_str = (
+                                    f"<span>Calories: {nutrition.get('Calories')} kcal ({percentage_contribution['Calories']:.1f}%) - {calories_desc}</span>, "
+                                    f"<span style='color: {fat_color};'>Fat: {nutrition.get('Fat')} g ({percentage_contribution['Fat']:.1f}%) - {fat_desc}</span>, "
+                                    f"<span style='color: {saturates_color};'>Saturates: {nutrition.get('Saturates')} g ({percentage_contribution['Saturates']:.1f}%) - {saturates_desc}</span>, "
+                                    f"<span style='color: {sugar_color};'>Sugar: {nutrition.get('Sugar')} g ({percentage_contribution['Sugar']:.1f}%) - {sugar_desc}</span>, "
+                                    f"<span style='color: {salt_color};'>Salt: {nutrition.get('Salt')} g ({percentage_contribution['Salt']:.1f}%) - {salt_desc}</span>"
+                                )
+
+                                detection_results += (
+                                    f"<b style='color: black;'>Food name:</b> {class_name}<br>"
+                                    f"<b style='color: black;'>Confidence:</b> {confident}%<br>"
+                                    f"<b style='color: black;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
+                                )
+
+                                for key in total_nutrition:
+                                    if key in nutrition:
+                                        total_nutrition[key] += nutrition[key]
+                if new_detections:
+                    scrollable_textbox = f"""
+                        <div style="
+                            font-family: 'Source Code Pro','monospace';
+                            font-size: 16px;
+                            overflow-y: scroll;
+                            padding: 10px;
+                            width: auto;
+                            height: auto;
+                        ">
+                            {detection_results}
+                        </div>
+                    """
+                    st.markdown(scrollable_textbox, unsafe_allow_html=True)
+                total_nutrition_str = (
+                    f"<b style='color: black;'>Total Nutrition:</b> "
+                    f"Calories: {total_nutrition['Calories']:.1f} kcal, "
+                    f"Fat: {total_nutrition['Fat']:.1f} g, "
+                    f"Saturates: {total_nutrition['Saturates']:.1f} g, "
+                    f"Sugar: {total_nutrition['Sugar']:.1f} g, "
+                    f"Salt: {total_nutrition['Salt']:.1f} g<br>"
+                )
+                total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
             else:
                 break
     except Exception as e:
         st.error(f"Error loading video: {str(e)}")
     finally:
         vid_cap.release()
+        displayed_dishes.clear()
 
 from typing import List, NamedTuple
-result_queue = queue.Queue()
+result_queue = queue.Queue(maxsize=12)
 
 class Detection(NamedTuple):
     class_id: int
@@ -614,18 +700,19 @@ class VideoTransformer(VideoTransformerBase):
         mirrored_frame = cv2.flip(img, 1)
         results = self.model(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True, vid_stride=80)
         # results = self.model.track(source=mirrored_frame, conf=self.conf, imgsz=640, save=False, device="cpu", stream=True)
+        detections = []
         for r in results:
             im_bgr = r.plot()
             for pred in r.boxes:
                 class_id = int(pred.cls[0].item())
-                detections = [
+                detections.append(
                     Detection(
                         class_id = int(pred.cls[0].item()),
                         class_name = class_names[int(class_id)]["name"],
                         confident = int(round(pred.conf[0].item(), 2)*100),
                         serving = class_names[int(class_id)]["serving_type"],
                     )
-                ]
+                )
 
         im_rgb = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2RGB)
         
@@ -643,7 +730,8 @@ class VideoTransformer(VideoTransformerBase):
 
         cv2.putText(im_rgb, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-        result_queue.put(detections)
+        if not result_queue.full():
+            result_queue.put(detections)
 
         return av.VideoFrame.from_ndarray(im_rgb, format="rgb24")   
 
@@ -661,8 +749,17 @@ def detect_webcam(conf, model):
 
     if webrtc_ctx.state.playing:
         st.markdown("""### Results:""")
+        total_nutrition_placeholder = st.empty()
         results_placeholder = st.empty()
+        
         while True:
+            total_nutrition = {
+                "Calories": 0,
+                "Fat": 0,
+                "Saturates": 0,
+                "Sugar": 0,
+                "Salt": 0
+            }
             detections = result_queue.get()
 
             detection_results = ""
@@ -706,10 +803,26 @@ def detect_webcam(conf, model):
                             f"<b style='color: black;'>Confidence:</b> {confident}%<br>"
                             f"<b style='color: black;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
                         )
-        
+                        for key in total_nutrition:
+                                    if key in nutrition:
+                                        total_nutrition[key] += nutrition[key]
 
             results_placeholder.markdown(detection_results, unsafe_allow_html=True)
+        
+            total_nutrition_str = (
+                f"<b style='color: black;'>Total Nutrition:</b> "
+                f"Calories: {total_nutrition['Calories']:.1f} kcal, "
+                f"Fat: {total_nutrition['Fat']:.1f} g, "
+                f"Saturates: {total_nutrition['Saturates']:.1f} g, "
+                f"Sugar: {total_nutrition['Sugar']:.1f} g, "
+                f"Salt: {total_nutrition['Salt']:.1f} g<br>"
+            )
+
+            total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
     
+            displayed_dishes.clear()
+    
+    result_queue.queue.clear()
 
 
 
