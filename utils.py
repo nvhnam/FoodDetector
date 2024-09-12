@@ -109,7 +109,12 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
 
                 frame_count = 0
                 start_time = time.time()
-                for r in results:
+
+                total_nutrition_placeholder = st.empty()
+                st.markdown("""### Results:""")
+                nutrition_placeholder = st.empty()
+
+                for r in results:          
                     for pred in r.boxes: 
                         class_id = int(pred.cls[0].item())
                         class_name = class_names[int(class_id)]["name"]
@@ -134,18 +139,40 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
 
                                 percentage_contribution = calculate_nutrient_percentage(nutrition)
 
-                                nutrition_str = (
-                                    f"<span>Calories: {nutrition.get('Calories')} kcal ({percentage_contribution['Calories']:.1f}%) - {calories_desc}</span>, "
-                                    f"<span style='color: {fat_color};'>Fat: {nutrition.get('Fat')} g ({percentage_contribution['Fat']:.1f}%) - {fat_desc}</span>, "
-                                    f"<span style='color: {saturates_color};'>Saturates: {nutrition.get('Saturates')} g ({percentage_contribution['Saturates']:.1f}%) - {saturates_desc}</span>, "
-                                    f"<span style='color: {sugar_color};'>Sugar: {nutrition.get('Sugar')} g ({percentage_contribution['Sugar']:.1f}%) - {sugar_desc}</span>, "
-                                    f"<span style='color: {salt_color};'>Salt: {nutrition.get('Salt')} g ({percentage_contribution['Salt']:.1f}%) - {salt_desc}</span>"
-                                )
+                                nutrition_str = f"""
+                                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px">
+                                        <div style="background-color: transparent; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Calories:</b></span><br>
+                                            <span>{nutrition.get('Calories')} kcal</span><br>
+                                            <span>{percentage_contribution['Calories']:.1f}%</span>
+                                        </div>
+                                        <div style="background-color: {fat_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Fat:</b></span><br>
+                                            <span>{nutrition.get('Fat')} g</span><br>
+                                            <span>{percentage_contribution['Fat']:.1f}%</span>
+                                        </div>
+                                        <div style="background-color: {saturates_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Saturates:</b></span><br>
+                                            <span>{nutrition.get('Saturates')} g</span><br>
+                                            <span>{percentage_contribution['Saturates']:.1f}%</span>
+                                        </div>
+                                        <div style="background-color: {sugar_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Sugar:</b></span><br>
+                                            <span>{nutrition.get('Sugar')} g</span><br>
+                                            <span>{percentage_contribution['Sugar']:.1f}%</span>
+                                        </div>
+                                        <div style="background-color: {salt_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Salt:</b></span><br>
+                                            <span>{nutrition.get('Salt')} g</span><br>
+                                            <span>{percentage_contribution['Salt']:.1f}%</span>
+                                        </div>
+                                    </div>
+                                    """
 
                                 detection_results += (
-                                    f"<b style='color: black;'>Food name:</b> {class_name}<br>"
-                                    f"<b style='color: black;'>Confidence:</b> {confident}%<br>"
-                                    f"<b style='color: black;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
+                                    f"<b style='color: black;'>({confident}%):</b> {class_name}<br>"
+                                    f"<div style='color: black; font-weight: bold; background_color:gray'>Nutrition ({serving})</div>"
+                                    f"<div style='color: black; font-weight: bold;'>{nutrition_str}</div>"
                                 )
 
                                 for key in total_nutrition:
@@ -178,9 +205,8 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                     if stop_button:
                         stop_pressed = True
                         stop_button = None
-                        break
-                
-                st.markdown("""### Results:""")
+                        break                       
+                    
                 if new_detections:
                     scrollable_textbox = f"""
                         <div style="
@@ -194,19 +220,35 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                             {detection_results}
                         </div>
                     """
-                    st.markdown(scrollable_textbox, unsafe_allow_html=True)
+                    nutrition_placeholder.markdown(scrollable_textbox, unsafe_allow_html=True)
                     
                 displayed_dishes.clear()
 
-                total_nutrition_str = (
-                                f"<b style='color: black;'>Total Nutrition:</b> "
-                                f"Calories: {total_nutrition['Calories']:.1f} kcal, "
-                                f"Fat: {total_nutrition['Fat']:.1f} g, "
-                                f"Saturates: {total_nutrition['Saturates']:.1f} g, "
-                                f"Sugar: {total_nutrition['Sugar']:.1f} g, "
-                                f"Salt: {total_nutrition['Salt']:.1f} g<br>"
-                            )
-                st.markdown(total_nutrition_str, unsafe_allow_html=True)
+                total_nutrition_str = f"""
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Calories</b></span><br>
+                            <span>{total_nutrition['Calories']:.1f} kcal</span>
+                        </div>
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Fat</b></span><br>
+                            <span>{total_nutrition['Fat']:.1f} g</span>
+                        </div>
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Saturates</b></span><br>
+                            <span>{total_nutrition['Saturates']:.1f} g</span>
+                        </div>
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Sugar</b></span><br>
+                            <span>{total_nutrition['Sugar']:.1f} g</span>
+                        </div>
+                        <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                            <span><b>Salt</b></span><br>
+                            <span>{total_nutrition['Salt']:.1f} g</span>
+                        </div>
+                    </div>
+                """
+                total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
                 # rows = zip(food_names1, confidences1)
 
                 # with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
@@ -381,7 +423,6 @@ def detect_image_result(detected_image, model):
             total_nutrition_placeholder = st.empty()
 
             for box in boxes:
-                # class_id = model.names[box.cls[0].item()]
                 class_id = int(box.cls[0].item())
                 class_name = class_names[int(class_id)]["name"] 
                 food_names.append(class_name)
@@ -600,14 +641,6 @@ def detect_image(conf, uploaded_file, model, url=False):
             with st.spinner("Running..."):
                 detected_image = model.predict(resized_uploaded_image, conf=conf, imgsz=640)
                 detect_image_result(detected_image, model)        
-        # elif uploaded_file and url:
-        #     with st.spinner("Running..."):
-        #         detected_image = model(resized_uploaded_image, conf=conf, imgsz=640)
-        #         detect_image_result(detected_image, model)
-
-        
-        # elif url==False and not st.session_state.button_clicked and not predict_button:
-        #     original_image.image(resized_uploaded_image, output_format="JPEG", use_column_width=True)
 
 def detect_camera(conf, model, address):
     vid_cap = cv2.VideoCapture('rtsp://admin:' + address)
@@ -637,9 +670,9 @@ def detect_camera(conf, model, address):
             "Salt": 0
         }
 
-        st.markdown("""### Results:""")
-
         total_nutrition_placeholder = st.empty()
+        
+        st.markdown("""### Results:""")
 
         frame_count = 0
         start_time = time.time()
@@ -689,18 +722,40 @@ def detect_camera(conf, model, address):
 
                                 percentage_contribution = calculate_nutrient_percentage(nutrition)
 
-                                nutrition_str = (
-                                    f"<span>Calories: {nutrition.get('Calories')} kcal ({percentage_contribution['Calories']:.1f}%) - {calories_desc}</span>, "
-                                    f"<span style='color: {fat_color};'>Fat: {nutrition.get('Fat')} g ({percentage_contribution['Fat']:.1f}%) - {fat_desc}</span>, "
-                                    f"<span style='color: {saturates_color};'>Saturates: {nutrition.get('Saturates')} g ({percentage_contribution['Saturates']:.1f}%) - {saturates_desc}</span>, "
-                                    f"<span style='color: {sugar_color};'>Sugar: {nutrition.get('Sugar')} g ({percentage_contribution['Sugar']:.1f}%) - {sugar_desc}</span>, "
-                                    f"<span style='color: {salt_color};'>Salt: {nutrition.get('Salt')} g ({percentage_contribution['Salt']:.1f}%) - {salt_desc}</span>"
-                                )
+                                nutrition_str = f"""
+                                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px">
+                                        <div style="background-color: transparent; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Calories:</b></span><br>
+                                            <span>{nutrition.get('Calories')} kcal</span><br>
+                                            <span>{percentage_contribution['Calories']:.1f}%</span>
+                                        </div>
+                                        <div style="background-color: {fat_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Fat:</b></span><br>
+                                            <span>{nutrition.get('Fat')} g</span><br>
+                                            <span>{percentage_contribution['Fat']:.1f}%</span>
+                                        </div>
+                                        <div style="background-color: {saturates_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Saturates:</b></span><br>
+                                            <span>{nutrition.get('Saturates')} g</span><br>
+                                            <span>{percentage_contribution['Saturates']:.1f}%</span>
+                                        </div>
+                                        <div style="background-color: {sugar_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Sugar:</b></span><br>
+                                            <span>{nutrition.get('Sugar')} g</span><br>
+                                            <span>{percentage_contribution['Sugar']:.1f}%</span>
+                                        </div>
+                                        <div style="background-color: {salt_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                            <span><b>Salt:</b></span><br>
+                                            <span>{nutrition.get('Salt')} g</span><br>
+                                            <span>{percentage_contribution['Salt']:.1f}%</span>
+                                        </div>
+                                    </div>
+                                    """
 
                                 detection_results += (
-                                    f"<b style='color: black;'>Food name:</b> {class_name}<br>"
-                                    f"<b style='color: black;'>Confidence:</b> {confident}%<br>"
-                                    f"<b style='color: black;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
+                                    f"<b style='color: black;'>({confident}%):</b> {class_name}<br>"
+                                    f"<div style='color: black; font-weight: bold; background_color:gray'>Nutrition ({serving})</div>"
+                                    f"<div style='color: black; font-weight: bold;'>{nutrition_str}</div>"
                                 )
 
                                 for key in total_nutrition:
@@ -823,8 +878,8 @@ def detect_webcam(conf, model):
     )
 
     if webrtc_ctx.state.playing:
-        st.markdown("""### Results:""")
         total_nutrition_placeholder = st.empty()
+        st.markdown("""### Results:""")
         results_placeholder = st.empty()
         
         while True:
@@ -865,18 +920,40 @@ def detect_webcam(conf, model):
 
                         percentage_contribution = calculate_nutrient_percentage(nutrition)
 
-                        nutrition_str = (
-                            f"<span>Calories: {nutrition.get('Calories')} kcal ({percentage_contribution['Calories']:.1f}%) - {calories_desc}</span>, "
-                            f"<span style='color: {fat_color};'>Fat: {nutrition.get('Fat')} g ({percentage_contribution['Fat']:.1f}%) - {fat_desc}</span>, "
-                            f"<span style='color: {saturates_color};'>Saturates: {nutrition.get('Saturates')} g ({percentage_contribution['Saturates']:.1f}%) - {saturates_desc}</span>, "
-                            f"<span style='color: {sugar_color};'>Sugar: {nutrition.get('Sugar')} g ({percentage_contribution['Sugar']:.1f}%) - {sugar_desc}</span>, "
-                            f"<span style='color: {salt_color};'>Salt: {nutrition.get('Salt')} g ({percentage_contribution['Salt']:.1f}%) - {salt_desc}</span>"
-                        )
+                        nutrition_str = f"""
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px">
+                                <div style="background-color: transparent; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Calories:</b></span><br>
+                                    <span>{nutrition.get('Calories')} kcal</span><br>
+                                    <span>{percentage_contribution['Calories']:.1f}%</span>
+                                </div>
+                                <div style="background-color: {fat_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Fat:</b></span><br>
+                                    <span>{nutrition.get('Fat')} g</span><br>
+                                    <span>{percentage_contribution['Fat']:.1f}%</span>
+                                </div>
+                                <div style="background-color: {saturates_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Saturates:</b></span><br>
+                                    <span>{nutrition.get('Saturates')} g</span><br>
+                                    <span>{percentage_contribution['Saturates']:.1f}%</span>
+                                </div>
+                                <div style="background-color: {sugar_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Sugar:</b></span><br>
+                                    <span>{nutrition.get('Sugar')} g</span><br>
+                                    <span>{percentage_contribution['Sugar']:.1f}%</span>
+                                </div>
+                                <div style="background-color: {salt_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                    <span><b>Salt:</b></span><br>
+                                    <span>{nutrition.get('Salt')} g</span><br>
+                                    <span>{percentage_contribution['Salt']:.1f}%</span>
+                                </div>
+                            </div>
+                            """
 
                         detection_results += (
-                            f"<b style='color: black;'>Food name:</b> {class_name}<br>"
-                            f"<b style='color: black;'>Confidence:</b> {confident}%<br>"
-                            f"<b style='color: black;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
+                            f"<b style='color: black;'>({confident}%):</b> {class_name}<br>"
+                            f"<div style='color: black; font-weight: bold; background_color:gray'>Nutrition ({serving})</div>"
+                            f"<div style='color: black; font-weight: bold;'>{nutrition_str}</div>"
                         )
                         for key in total_nutrition:
                                     if key in nutrition:
@@ -884,14 +961,30 @@ def detect_webcam(conf, model):
 
             results_placeholder.markdown(detection_results, unsafe_allow_html=True)
         
-            total_nutrition_str = (
-                f"<b style='color: black;'>Total Nutrition:</b> "
-                f"Calories: {total_nutrition['Calories']:.1f} kcal, "
-                f"Fat: {total_nutrition['Fat']:.1f} g, "
-                f"Saturates: {total_nutrition['Saturates']:.1f} g, "
-                f"Sugar: {total_nutrition['Sugar']:.1f} g, "
-                f"Salt: {total_nutrition['Salt']:.1f} g<br>"
-            )
+            total_nutrition_str = f"""
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Calories</b></span><br>
+                        <span>{total_nutrition['Calories']:.1f} kcal</span>
+                    </div>
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Fat</b></span><br>
+                        <span>{total_nutrition['Fat']:.1f} g</span>
+                    </div>
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Saturates</b></span><br>
+                        <span>{total_nutrition['Saturates']:.1f} g</span>
+                    </div>
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Sugar</b></span><br>
+                        <span>{total_nutrition['Sugar']:.1f} g</span>
+                    </div>
+                    <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                        <span><b>Salt</b></span><br>
+                        <span>{total_nutrition['Salt']:.1f} g</span>
+                    </div>
+                </div>
+                """
 
             total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
     
@@ -1003,7 +1096,9 @@ def detect_from_file(conf, video_file):
     stop_pressed = False
     skip_frames = 0
 
+    total_nutrition_placeholder = st.empty()
     st.markdown("""### Results:""")
+    
 
     while True:
         if skip_frames > 0:
@@ -1026,7 +1121,7 @@ def detect_from_file(conf, video_file):
 
         new_detections = False  
         detection_results = ""
-
+        
         for output_array in outputs:        
             for output in output_array[0]:
                 x1, y1, x2, y2, score, class_id = output[:6]
@@ -1037,6 +1132,8 @@ def detect_from_file(conf, video_file):
                     frames1.append(frame_count)
                     confident = round(score*100)
                     serving = class_names[int(class_id)]["serving_type"]
+
+
 
                     if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
                         detection_results += f"<b style='color: black;'>Class name:</b> {class_name}<br><b style='color: black;'>Confidence:</b> {confident}%<br>---<br>"
@@ -1056,18 +1153,40 @@ def detect_from_file(conf, video_file):
 
                             percentage_contribution = calculate_nutrient_percentage(nutrition)
 
-                            nutrition_str = (
-                                f"<span>Calories: {nutrition.get('Calories')} kcal ({percentage_contribution['Calories']:.1f}%) - {calories_desc}</span>, "
-                                f"<span style='color: {fat_color};'>Fat: {nutrition.get('Fat')} g ({percentage_contribution['Fat']:.1f}%) - {fat_desc}</span>, "
-                                f"<span style='color: {saturates_color};'>Saturates: {nutrition.get('Saturates')} g ({percentage_contribution['Saturates']:.1f}%) - {saturates_desc}</span>, "
-                                f"<span style='color: {sugar_color};'>Sugar: {nutrition.get('Sugar')} g ({percentage_contribution['Sugar']:.1f}%) - {sugar_desc}</span>, "
-                                f"<span style='color: {salt_color};'>Salt: {nutrition.get('Salt')} g ({percentage_contribution['Salt']:.1f}%) - {salt_desc}</span>"
-                            )
+                            nutrition_str = f"""
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px">
+                                    <div style="background-color: transparent; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                        <span><b>Calories:</b></span><br>
+                                        <span>{nutrition.get('Calories')} kcal</span><br>
+                                        <span>{percentage_contribution['Calories']:.1f}%</span>
+                                    </div>
+                                    <div style="background-color: {fat_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                        <span><b>Fat:</b></span><br>
+                                        <span>{nutrition.get('Fat')} g</span><br>
+                                        <span>{percentage_contribution['Fat']:.1f}%</span>
+                                    </div>
+                                    <div style="background-color: {saturates_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                        <span><b>Saturates:</b></span><br>
+                                        <span>{nutrition.get('Saturates')} g</span><br>
+                                        <span>{percentage_contribution['Saturates']:.1f}%</span>
+                                    </div>
+                                    <div style="background-color: {sugar_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                        <span><b>Sugar:</b></span><br>
+                                        <span>{nutrition.get('Sugar')} g</span><br>
+                                        <span>{percentage_contribution['Sugar']:.1f}%</span>
+                                    </div>
+                                    <div style="background-color: {salt_color}; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                                        <span><b>Salt:</b></span><br>
+                                        <span>{nutrition.get('Salt')} g</span><br>
+                                        <span>{percentage_contribution['Salt']:.1f}%</span>
+                                    </div>
+                                </div>
+                                """
 
                             detection_results += (
-                                f"<b style='color: black;'>Food name:</b> {class_name}<br>"
-                                f"<b style='color: black;'>Confidence:</b> {confident}%<br>"
-                                f"<b style='color: black;'>Nutrition ({serving}):</b> {nutrition_str}<br>---<br>"
+                                f"<b style='color: black;'>({confident}%):</b> {class_name}<br>"
+                                f"<div style='color: black; font-weight: bold; background_color:gray'>Nutrition ({serving})</div>"
+                                f"<div style='color: black; font-weight: bold;'>{nutrition_str}</div>"
                             )
 
                             for key in total_nutrition:
@@ -1095,7 +1214,8 @@ def detect_from_file(conf, video_file):
                     overflow-y: scroll;
                     padding: 10px;
                     width: auto;
-                    height: auto;
+                    height: 400px;
+                    margin: 20px;
                 ">
                     {detection_results}
                 </div>
@@ -1123,15 +1243,31 @@ def detect_from_file(conf, video_file):
     out.release()
     displayed_dishes.clear()
 
-    total_nutrition_str = (
-                    f"<b style='color: black;'>Total Nutrition:</b> "
-                    f"Calories: {total_nutrition['Calories']:.1f} kcal, "
-                    f"Fat: {total_nutrition['Fat']:.1f} g, "
-                    f"Saturates: {total_nutrition['Saturates']:.1f} g, "
-                    f"Sugar: {total_nutrition['Sugar']:.1f} g, "
-                    f"Salt: {total_nutrition['Salt']:.1f} g<br>"
-                )
-    st.markdown(total_nutrition_str, unsafe_allow_html=True)
+    total_nutrition_str = f"""
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                <span><b>Calories</b></span><br>
+                <span>{total_nutrition['Calories']:.1f} kcal</span>
+            </div>
+            <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                <span><b>Fat</b></span><br>
+                <span>{total_nutrition['Fat']:.1f} g</span>
+            </div>
+            <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                <span><b>Saturates</b></span><br>
+                <span>{total_nutrition['Saturates']:.1f} g</span>
+            </div>
+            <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                <span><b>Sugar</b></span><br>
+                <span>{total_nutrition['Sugar']:.1f} g</span>
+            </div>
+            <div style="border: 1px solid black; padding: 10px; border-radius: 5px; text-align: center; width: 150px;">
+                <span><b>Salt</b></span><br>
+                <span>{total_nutrition['Salt']:.1f} g</span>
+            </div>
+        </div>
+        """
+    total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
 
     # with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
     with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir=tempfile.gettempdir()) as csv_file:

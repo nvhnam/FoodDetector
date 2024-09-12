@@ -247,7 +247,7 @@ def render_content():
             expander.write('''
     - Uploading image files from the user's local machine or using an image URL is supported.
     - After the prediction process, two buttons will appear to download the results as an image file with bounding boxes or a CSV file.
-    - The results are generated when the user clicks the button and are named in the format: `"%date-%month-%year_%hour-%minute".jpg/csv`.
+    - The results are generated when the user clicks the button and are named in the format: `"%date-%month-%year".jpg/csv`.
             ''', unsafe_allow_html=True)
             st.markdown(f'''
     <style>
@@ -297,7 +297,7 @@ def render_content():
             st.subheader("Video Upload :movie_camera:")
             expander = st.expander("Instructions: Video upload and URL")  
             expander.write('''
-- Video: upload video files (`.mp4, .mpeg4, etc.`) from the user's local machine.
+- Video: upload video files `(.mp4, .mpeg4, etc.)` from the user's local machine.
 - Youtube video or shorts URL links are supported for real-time prediction.
 - The results will be in a CSV file recording all dishes detected across all frames (no image results).
             ''', unsafe_allow_html=True)
