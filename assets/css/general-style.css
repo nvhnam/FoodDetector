@@ -380,7 +380,7 @@ h4.dataset-page {
     border: 1px solid black;
 }
 
-#result-nutri-container {
+.result-nutri-container {
     background-color: var(--grey-light);
     padding: 0rem 1rem;
     border-radius: 5px;
@@ -389,10 +389,13 @@ h4.dataset-page {
 }
 
 /* NO FOOD */
-#no-food {
-
+#no-food-detected {
+    background-color: white !important;
+    border: 1px solid var(--red-nu) !important;
+    color: var(--red-nu) !important;
 }
 
 #no-food-descr {
-    
+    padding: 16px !important;
+    background-color: var(--grey-lightest);
 }
