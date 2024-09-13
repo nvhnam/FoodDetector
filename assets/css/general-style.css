@@ -7,6 +7,7 @@
     --white: #FFFFFF;
     --button-color-yellow: #FEC51C; 
     --button-color-yellow-hover: #fcd96b;
+    --button-color-yellow-expander: #fff4d1;
     --brown: #2C1100;
     --green-nu: #85bb2f;
     --yellow-nu: #fecb02;
@@ -17,6 +18,14 @@
     margin: 0;
     padding: 0;
     gap: 0;
+}
+
+button, .MuiButtonBase-root, button.MuiButtonBase-root.MuiButton-root.MuiButton-contained, .css-gb57o4 {
+    font-family: 'Montserrat' !important;
+    font-style: normal;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/montserrat/v26/JTUSjIg1_i6t8kCHKm459Wdhyzbi.woff2) format('woff2');
+    unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 code {
@@ -164,12 +173,13 @@ hr {
     padding-left: 0.5rem;
 }
 .st-emotion-cache-1h9usn1 {
-    background-color: var(--button-color-yellow) !important;
+    background-color: var(--button-color-yellow-expander) !important;
+    border: 2px solid var(--button-color-yellow);
     font-size: calc(16px +1vw);
 }
 
 [data-testid="stExpanderDetails"] {
-    background-color: var(--grey-light);
+    background-color: var(--grey-lightest);
     border-radius: 8px;
 }
 

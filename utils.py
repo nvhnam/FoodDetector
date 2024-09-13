@@ -259,7 +259,8 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                 download_csv = st.download_button(label="Download Predictions CSV",
                                 data=the_csv,
                                 file_name=f"{time_format}.csv", 
-                                use_container_width=True)
+                                use_container_width=True,
+                                key=f"download_csv3_button_{time_format}")
                 if download_csv:
                     os.remove(csv_filename)
             except ConnectionError as e:
@@ -561,14 +562,16 @@ def detect_image_result(detected_image, model):
                                     data=the_img,
                                     mime="image/jpg",
                                     file_name=f"{time_format}.jpg", 
-                                    use_container_width=True)
+                                    use_container_width=True,
+                                    key=f"download_pic_button_{time_format}")
             if download_pic:
                 os.remove(img_filename)
         with col2: 
             download_csv = st.download_button(label="Download Predictions CSV", 
                                data=the_csv, 
                                file_name=f"{time_format}.csv", 
-                               use_container_width=True)
+                               use_container_width=True,
+                               key=f"download_csv_button_{time_format}")
             if download_csv:
                 os.remove(csv_filename)
         st.divider()
@@ -1272,13 +1275,13 @@ def detect_from_file(conf, video_file):
                                 data=the_mp4,
                                 mime="video/mp4",
                                 file_name=f"{timestamp}.mp4", 
-                                use_container_width=True)
+                                use_container_width=True,)
         if download_video:
             os.remove(mp4_filename)
     with col2: 
         download_csv = st.download_button(label="Download Predictions CSV", 
                             data=the_csv, 
                             file_name=f"{timestamp}.csv", 
-                            use_container_width=True)
+                            use_container_width=True,)
         if download_csv:
             os.remove(csv_filename)
