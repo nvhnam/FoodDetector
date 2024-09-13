@@ -154,7 +154,7 @@ def render_content():
     }}
 
     p.define.subtitle-text-score {{
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
     }}
     
     </style>
