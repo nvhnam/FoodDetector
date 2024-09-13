@@ -381,11 +381,11 @@ h4.dataset-page {
 }
 
 .result-nutri-container {
-    background-color: var(--grey-light);
-    padding: 0rem 1rem;
-    border-radius: 5px;
-    overflow: hidden;
-    margin-bottom: 0.6rem;
+    background-color: var(--grey-light) !important;
+    padding: 0rem 1rem !important;
+    border-radius: 5px !important;
+    overflow: hidden !important;
+    margin-bottom: 0.6rem !important;
 }
 
 /* NO FOOD */
@@ -398,4 +398,12 @@ h4.dataset-page {
 #no-food-descr {
     padding: 16px !important;
     background-color: var(--grey-lightest);
+}
+
+.human-class-name {
+    margin-top: 1rem;
+}
+
+.human-confident {
+
 }

@@ -122,7 +122,8 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                         serving = class_names[int(class_id)]["serving_type"]
 
                         if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
-                            detection_results += f"<b style='color: black;'>Class name:</b> {class_name}<br><b style='color: black;'>Confidence:</b> {confident}%<br>---<br>"
+                            detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {confident}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
+
                             displayed_dishes.add(class_name)
                             new_detections = True
                         elif class_name not in displayed_dishes:
@@ -429,7 +430,8 @@ def detect_image_result(detected_image, model):
                     count_dict[class_id] = 1
 
                 if class_name == "Con nguoi (Human)":
-                    detection_results += f"<b style='color: black;'>Class name:</b> {class_name}<br><b style='color: black;'>Confidence:</b> {conf}%<br>---<br>"
+                    detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {conf}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
+
                 else:
                     nutrition = class_names[int(class_id)]["nutrition"]
                     if nutrition:
@@ -665,7 +667,8 @@ def detect_camera(conf, model, address):
 
         total_nutrition_placeholder = st.empty()
         
-        st.markdown("""### Results:""")
+        st.markdown("""<br>
+                        <h5>Results:</h5>""", unsafe_allow_html=True)
 
         frame_count = 0
         start_time = time.time()
@@ -698,7 +701,7 @@ def detect_camera(conf, model, address):
                         serving = class_names[int(class_id)]["serving_type"]
 
                         if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
-                            detection_results += f"<b style='color: black;'>Class name:</b> {class_name}<br><b style='color: black;'>Confidence:</b> {confident}%<br>---<br>"
+                            detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {confident}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
                             displayed_dishes.add(class_name)
                             new_detections = True
                         elif class_name not in displayed_dishes:
@@ -866,7 +869,8 @@ def detect_webcam(conf, model):
 
     if webrtc_ctx.state.playing:
         total_nutrition_placeholder = st.empty()
-        st.markdown("""### Results:""")
+        st.markdown("""<br>
+                        <h5>Results:</h5>""", unsafe_allow_html=True)
         results_placeholder = st.empty()
         
         while True:
@@ -890,7 +894,8 @@ def detect_webcam(conf, model):
                 serving = detection.serving
                 
                 if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
-                    detection_results += f"<b style='color: black;'>Class name:</b> {class_name}<br><b style='color: black;'>Confidence:</b> {confident}%<br>---<br>"
+                    detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {confident}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
+
                     displayed_dishes.add(class_name)
                     new_detections = True
                 elif class_name not in displayed_dishes:
@@ -947,7 +952,7 @@ def detect_webcam(conf, model):
                                     if key in nutrition:
                                         total_nutrition[key] += nutrition[key]
 
-            results_placeholder.markdown(detection_results, unsafe_allow_html=True)
+            results_placeholder.markdown(f"""<div class="result-nutri-container">{detection_results}</div>""", unsafe_allow_html=True)
         
             total_nutrition_str = f"""
     <h5 class="total-nutrition-title">Total Nutrition Values</h5>
@@ -1086,7 +1091,8 @@ def detect_from_file(conf, video_file):
     skip_frames = 0
 
     total_nutrition_placeholder = st.empty()
-    st.markdown("""### Results:""")
+    st.markdown("""<br>
+                        <h5>Results:</h5>""", unsafe_allow_html=True)
     
 
     while True:
@@ -1125,7 +1131,8 @@ def detect_from_file(conf, video_file):
 
 
                     if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
-                        detection_results += f"<b style='color: black;'>Class name:</b> {class_name}<br><b style='color: black;'>Confidence:</b> {confident}%<br>---<br>"
+                        detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {confident}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
+
                         displayed_dishes.add(class_name)
                         new_detections = True
                     elif class_name not in displayed_dishes:

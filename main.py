@@ -8,6 +8,7 @@ from utils import _display_detected_frame, detect_camera, detect_image, detect_v
 st.set_page_config(
     page_title="FoodDetector",
     page_icon=":microscope:"
+    
 )
 
 # import streamlit as st
