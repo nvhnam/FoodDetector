@@ -588,7 +588,6 @@ def detect_image_result(detected_image, model):
 
 
 def detect_image(conf, uploaded_file, model, url=False):
-    if uploaded_file is not None:
         if "button_clicked" not in st.session_state:
             st.session_state.button_clicked = False
         
@@ -607,6 +606,8 @@ def detect_image(conf, uploaded_file, model, url=False):
             if reset == True:
                 st.session_state.is_reset = not st.session_state.is_reset
         
+        original_image = st.empty()
+
         if url==False:
             uploaded_image = Image.open(uploaded_file)
         else:
@@ -615,8 +616,6 @@ def detect_image(conf, uploaded_file, model, url=False):
             uploaded_image = Image.open(BytesIO(response.content))
 
         resized_uploaded_image = resize_image(uploaded_image)
-
-        original_image = st.empty()
 
         if st.session_state.show_image and not st.session_state.is_reset and not st.session_state.button_clicked:   
             original_image = st.image(resized_uploaded_image, output_format="JPEG", use_column_width=True)
