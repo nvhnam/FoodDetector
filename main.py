@@ -8,6 +8,7 @@ from utils import _display_detected_frame, detect_camera, detect_image, detect_v
 st.set_page_config(
     page_title="FoodDetector",
     page_icon=":microscope:"
+    
 )
 
 # import streamlit as st
@@ -153,7 +154,7 @@ def render_content():
     }}
 
     p.define.subtitle-text-score {{
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
     }}
     
     </style>
@@ -237,6 +238,39 @@ def render_content():
         model1 = load_model()
         model = load_onnx_model()
 
+        st.markdown("""
+    <style>
+    /* Style the tab labels */
+    button[data-baseweb="tab"] {
+        padding: calc(8px + 0.5vw) calc(8px + 1vw);
+        gap: 0;
+
+    }
+    button[data-baseweb="tab"] p {
+        font-size: calc(10px + 0.5vw) !important;
+        font-weight: 500 !important;        
+    }
+    
+    div[data-baseweb="tab-list"] {
+        gap: 0;
+    }
+    /* Style the active tab */
+    button[data-baseweb="tab"][aria-selected="true"] {
+        background-color: var(--button-color-yellow); /* Active tab color */
+        border-radius: 8px 7px 0 0;
+        color: black;
+    }
+
+    /* Style the inactive tabs */
+    button[data-baseweb="tab"][aria-selected="false"] {
+        color: var(--grey-code-expander);
+    }
+    
+    div[data-baseweb="tab-border"] {
+    }
+    </style>
+""", unsafe_allow_html=True)
+        
         tab1, tab2, tab3, tab4 = st.tabs(["Image", "Video", "Webcam", "IP Camera"])
 
         with tab1:
@@ -342,27 +376,34 @@ def render_content():
             ''', unsafe_allow_html=True)    
             
             st.text("Enter your Camera (RTSP) address: ")
-            col1, col2 = st.columns([1, 4])
-            with col1: 
-                st.text("rtsp://admin:")
-            with col2:
-                with st.form("ip_camera_form"):
-                    address = st.text_input("Label", label_visibility="collapsed", placeholder="hd543211@192.168.14.106:554/Streaming/channels/101")
-                    col1, col2 = st.columns([3, 0.8])
-                    with col1:
-                        submitted = st.form_submit_button("Connect")
-                    with col2:
-                        cancel = st.form_submit_button("Disconnect")
-                    if submitted:
-                        if address:
-                            detect_camera(confidence, model1, address=address)
-                        else:
-                            st.error("Please enter a valid RTSP camera URL")
-                    if cancel:
-                        if address:
-                            detect_camera(confidence, model1, address="")
-                            st.toast("Disconnected", icon="✅")
-    
+            with st.form("ip_camera_form"):
+                col1, col2 = st.columns([2, 8])
+                with col1:
+                    st.write("rtsp://admin:")  # Place the static text on the same line
+                with col2:
+                    address = st.text_input(
+                        "Label", 
+                        label_visibility="collapsed", 
+                        placeholder="hd543211@192.168.14.106:554/Streaming/channels/101"
+                    )
+                    
+                col1, col2 = st.columns([2, 1.35])
+                with col1:
+                    submitted = st.form_submit_button("Connect")
+                with col2:
+                    cancel = st.form_submit_button("Disconnect")
+            
+                if submitted:
+                    if address:
+                        detect_camera(confidence, model1, address=address)
+                    else:
+                        st.error("Please enter a valid RTSP camera URL")
+                
+                if cancel:
+                    if address:
+                        detect_camera(confidence, model1, address="")
+                        st.toast("Disconnected", icon="✅")
+
     st.markdown('''
     <div>
         <a href="#top-section" class="top-button" onclick="smoothScroll(event, 'top-section')">

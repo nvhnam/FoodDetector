@@ -7,6 +7,7 @@
     --white: #FFFFFF;
     --button-color-yellow: #FEC51C; 
     --button-color-yellow-hover: #fcd96b;
+    --button-color-yellow-expander: #fff4d1;
     --brown: #2C1100;
     --green-nu: #85bb2f;
     --yellow-nu: #fecb02;
@@ -17,6 +18,14 @@
     margin: 0;
     padding: 0;
     gap: 0;
+}
+
+button, .MuiButtonBase-root, button.MuiButtonBase-root.MuiButton-root.MuiButton-contained, .css-gb57o4 {
+    font-family: 'Montserrat' !important;
+    font-style: normal;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/montserrat/v26/JTUSjIg1_i6t8kCHKm459Wdhyzbi.woff2) format('woff2');
+    unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 code {
@@ -135,7 +144,7 @@ a.top-button:hover {
 /* GENERAL */
 .define {
     margin-left: calc(1.3rem + 1vw);
-    margin-top: 1.3rem ;
+    margin-top: 1rem ;
     margin-bottom: 1.3rem ;
 }
 .define-li {
@@ -164,12 +173,13 @@ hr {
     padding-left: 0.5rem;
 }
 .st-emotion-cache-1h9usn1 {
-    background-color: var(--button-color-yellow) !important;
+    background-color: var(--button-color-yellow-expander) !important;
+    border: 2px solid var(--button-color-yellow);
     font-size: calc(16px +1vw);
 }
 
 [data-testid="stExpanderDetails"] {
-    background-color: var(--grey-light);
+    background-color: var(--grey-lightest);
     border-radius: 8px;
 }
 
@@ -278,7 +288,7 @@ h4.dataset-page {
         font-size: calc(2px + 3vw);
     }
 }
-
+/* TOTAL */
 .total-nutrition-container {
     display: flex;
     flex-wrap: wrap;
@@ -311,11 +321,17 @@ h4.dataset-page {
     border: 1px solid black;
 }
 
-.total-count-result {
+.total-count-result-text {
     font-size: calc(10px + 0.5vw);
     font-weight: 600;
+    margin-bottom: 2px;
+    display: list-item;
+    list-style-type: disc;
+}
+
+.total-count-result-div {
     background-color: var(--grey-light);
-    padding: 1rem 0 1rem 1rem;
+    padding: 1rem 0 1rem 1.8rem;
     border-radius: 5px;
     margin-bottom: 5px;
 }
@@ -380,19 +396,30 @@ h4.dataset-page {
     border: 1px solid black;
 }
 
-#result-nutri-container {
-    background-color: var(--grey-light);
-    padding: 0rem 1rem;
-    border-radius: 5px;
-    overflow: hidden;
-    margin-bottom: 0.6rem;
+.result-nutri-container {
+    background-color: var(--grey-light) !important;
+    padding: 0rem 1rem !important;
+    border-radius: 5px !important;
+    overflow: hidden !important;
+    margin-bottom: 0.6rem !important;
 }
 
 /* NO FOOD */
-#no-food {
-
+#no-food-detected {
+    background-color: white !important;
+    border: 1px solid var(--red-nu) !important;
+    color: var(--red-nu) !important;
 }
 
 #no-food-descr {
-    
+    padding: 16px !important;
+    background-color: var(--grey-lightest);
+}
+
+.human-class-name {
+    margin-top: 1rem;
+}
+
+.human-confident {
+
 }
