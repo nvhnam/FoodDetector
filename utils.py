@@ -533,7 +533,7 @@ def detect_image_result(detected_image, model):
                 counts.append(count)
                 # detection_results += f"<b style='color: black;'>Count of {the_name}:</b> {count}<br>"
                 count_results += f"""
-                <p class="total-count-result">{the_name}: {count}</p>"""
+                <p class="total-count-result-text">{the_name}: {count}</p>"""
                 
 
             scrollable_textbox = f"""<div class="result-nutri-container">{detection_results}</div>"""
@@ -541,7 +541,7 @@ def detect_image_result(detected_image, model):
             st.markdown("""<br>
                         <h5>Results:</h5>""", unsafe_allow_html=True)
             
-            st.markdown(count_results, unsafe_allow_html=True)
+            st.markdown(f'<div class="total-count-result-div">{count_results}</div>', unsafe_allow_html=True)
             st.markdown(scrollable_textbox, unsafe_allow_html=True)
 
             # rows = zip(food_names, confidences, counts)

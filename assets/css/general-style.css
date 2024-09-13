@@ -288,7 +288,7 @@ h4.dataset-page {
         font-size: calc(2px + 3vw);
     }
 }
-
+/* TOTAL */
 .total-nutrition-container {
     display: flex;
     flex-wrap: wrap;
@@ -321,11 +321,17 @@ h4.dataset-page {
     border: 1px solid black;
 }
 
-.total-count-result {
+.total-count-result-text {
     font-size: calc(10px + 0.5vw);
     font-weight: 600;
+    margin-bottom: 2px;
+    display: list-item;
+    list-style-type: disc;
+}
+
+.total-count-result-div {
     background-color: var(--grey-light);
-    padding: 1rem 0 1rem 1rem;
+    padding: 1rem 0 1rem 1.8rem;
     border-radius: 5px;
     margin-bottom: 5px;
 }
