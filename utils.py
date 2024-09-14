@@ -112,7 +112,8 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                 start_time = time.time()
 
                 total_nutrition_placeholder = st.empty()
-                st.markdown("""<br><h5>Results:</h5>""", unsafe_allow_html=True)
+                st.markdown("""<br>
+                        <h5 class="detection-results">Detection Results</h5><p class="small-text-below-results">We found the following foods in your meal</p>""", unsafe_allow_html=True)
                 nutrition_placeholder = st.empty()
 
                 for r in results:          
@@ -172,7 +173,7 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                             """
 
                                 detection_results += (
-                    f"""<p class="item-header"><b>{confident}%:</b> {class_name}</p>
+                    f"""<p class="item-header">{confident}%: <b>{class_name}</b></p>
                     <p class="nutrition-header">Nutrition ({serving})</p>
                     <p class="nutrition-facts">{nutrition_str}</p>
                     <hr style="border: none; border-top: 1px dashed black; width: 80%;">
@@ -465,7 +466,7 @@ def detect_image_result(detected_image, model):
                         buffered = io.BytesIO()
                         bbox_image_pil.save(buffered, format="JPEG")
                         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-                        bbox_image_html = f'<img src="data:image/jpeg;base64,{img_str}" style="width: 100px; height: 100px;">'
+                        bbox_image_html = f'<img src="data:image/jpeg;base64,{img_str}" class="img-each-nutri" ">'
 
                     
 
@@ -491,9 +492,6 @@ def detect_image_result(detected_image, model):
 
                             nutrition_str = f"""
     <div class="each-nutri-container">
-        <div class="each-nutri-box" style="background-color: "transparent";">
-            {bbox_image_html}
-        </div>
         <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
             <span class="each-nutri-name">Calories</span><br>
             <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
@@ -524,8 +522,8 @@ def detect_image_result(detected_image, model):
 
 
                         detection_results += (
-                        f"""<p class="item-header"><b>{count_dict[class_id]} ({conf}%):</b> {class_name}</p>
-                        <p class="nutrition-header">Nutrition ({serving})</p>
+                        f"""<p class="item-header">{count_dict[class_id]} ({conf}%): <b>{class_name}</b></p>
+                        <p class="nutrition-header">Nutrition ({serving}) </p><img style="background-color: "transparent">{bbox_image_html}</img>
                         <p class="nutrition-facts">{nutrition_str}</p>
                         <hr style="border: none; border-top: 1px dashed black; width: 80%;">
                         """)
@@ -581,13 +579,12 @@ def detect_image_result(detected_image, model):
                 counts.append(count)
                 # detection_results += f"<b style='color: black;'>Count of {the_name}:</b> {count}<br>"
                 count_results += f"""
-                <p class="total-count-result-text">{the_name}: {count}</p>"""
+                <p class="total-count-result-text">{the_name}: {count}<hr class="dash-line-below-count-results"></p>"""
                 
-
             scrollable_textbox = f"""<div class="result-nutri-container">{detection_results}</div>"""
             
             st.markdown("""<br>
-                        <h5>Results:</h5>""", unsafe_allow_html=True)
+                        <h5 class="detection-results">Detection Results</h5><p class="small-text-below-results">We found the following foods in your meal</p>""", unsafe_allow_html=True)
             
             st.markdown(f'<div class="total-count-result-div">{count_results}</div>', unsafe_allow_html=True)
             st.markdown(scrollable_textbox, unsafe_allow_html=True)
@@ -717,7 +714,7 @@ def detect_camera(conf, model, address):
         total_nutrition_placeholder = st.empty()
         
         st.markdown("""<br>
-                        <h5>Results:</h5>""", unsafe_allow_html=True)
+                        <h5 class="detection-results">Detection Results</h5><p class="small-text-below-results">We found the following foods in your meal</p>""", unsafe_allow_html=True)
 
         frame_count = 0
         start_time = time.time()
@@ -798,7 +795,7 @@ def detect_camera(conf, model, address):
                             """
 
                                 detection_results += (
-                    f"""<p class="item-header"><b>{confident}%:</b> {class_name}</p>
+                    f"""<p class="item-header">{confident}%: <b>{class_name}</b></p>
                     <p class="nutrition-header">Nutrition ({serving})</p>
                     <p class="nutrition-facts">{nutrition_str}</p>
                     <hr style="border: none; border-top: 1px dashed black; width: 80%;">
@@ -919,7 +916,7 @@ def detect_webcam(conf, model):
     if webrtc_ctx.state.playing:
         total_nutrition_placeholder = st.empty()
         st.markdown("""<br>
-                        <h5>Results:</h5>""", unsafe_allow_html=True)
+                        <h5 class="detection-results">Detection Results</h5><p class="small-text-below-results">We found the following foods in your meal</p>""", unsafe_allow_html=True)
         results_placeholder = st.empty()
         
         while True:
@@ -992,7 +989,7 @@ def detect_webcam(conf, model):
                             """
 
                         detection_results += (
-                    f"""<p class="item-header"><b>{confident}%:</b> {class_name}</p>
+                    f"""<p class="item-header">{confident}%: <b>{class_name}</b></p>
                     <p class="nutrition-header">Nutrition ({serving})</p>
                     <p class="nutrition-facts">{nutrition_str}</p>
                     <hr style="border: none; border-top: 1px dashed black; width: 80%;">
@@ -1141,7 +1138,7 @@ def detect_from_file(conf, video_file):
 
     total_nutrition_placeholder = st.empty()
     st.markdown("""<br>
-                        <h5>Results:</h5>""", unsafe_allow_html=True)
+                        <h5 class="detection-results">Detection Results</h5><p class="small-text-below-results">We found the following foods in your meal</p>""", unsafe_allow_html=True)
     
 
     while True:
@@ -1229,7 +1226,7 @@ def detect_from_file(conf, video_file):
                             """
 
                             detection_results += (
-                    f"""<p class="item-header"><b>{confident}%:</b> {class_name}</p>
+                    f"""<p class="item-header">{confident}%: <b>{class_name}</b></p>
                     <p class="nutrition-header">Nutrition ({serving})</p>
                     <p class="nutrition-facts">{nutrition_str}</p>
                     <hr style="border: none; border-top: 1px dashed black; width: 80%;">
