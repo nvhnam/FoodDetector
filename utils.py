@@ -381,6 +381,26 @@ def calculate_nutrient_percentage(nutrition):
     }
     return percentage
 
+import torch
+
+def extract_bounding_box_image(image, boxes):
+    h, w = image.shape[:2]
+    extracted_images = []
+
+    for box in boxes:
+        if isinstance(box, torch.Tensor):
+            box = box.cpu().numpy()
+        x1, y1, x2, y2 = box
+        startX, startY, endX, endY = int(x1), int(y1), int(x2), int(y2)
+ 
+        startX, startY = max(0, startX), max(0, startY)
+        endX, endY = min(w, endX), min(h, endY)
+
+        bbox_image = image[startY:endY, startX:endX]
+        extracted_images.append(bbox_image)
+
+    return extracted_images
+
 def detect_image_result(detected_image, model):
     boxes = detected_image[0].boxes
 
@@ -416,87 +436,113 @@ def detect_image_result(detected_image, model):
             }
 
             total_nutrition_placeholder = st.empty()
+            
+            for r in detected_image[0]:
+                for box in r.boxes:
+                    class_id = int(box.cls[0].item())
+                    class_name = class_names[int(class_id)]["name"] 
+                    food_names.append(class_name)
+                    conf = int(round(box.conf[0].item(), 2)*100)
+                    confidences.append(conf)
+                    serving = class_names[int(class_id)]["serving_type"]
 
-            for box in boxes:
-                class_id = int(box.cls[0].item())
-                class_name = class_names[int(class_id)]["name"] 
-                food_names.append(class_name)
-                conf = int(round(box.conf[0].item(), 2)*100)
-                confidences.append(conf)
-                serving = class_names[int(class_id)]["serving_type"]
+                    if isinstance(box.xyxy, torch.Tensor):
+                        boxes = box.xyxy.cpu().numpy()
+                    else:
+                        boxes = box.xyxy.numpy()
+                
+                    image_np = r.orig_img 
+                    
+                    bounding_box_images = extract_bounding_box_image(image_np, boxes)
 
-                if class_id in count_dict:
-                    count_dict[class_id] += 1
-                else:
-                    count_dict[class_id] = 1
+                    bbox_image_html = ""
+                    if bounding_box_images:
+                        bbox_image = bounding_box_images[0]
+                        bbox_image_pil = Image.fromarray(cv2.cvtColor(bbox_image, cv2.COLOR_BGR2RGB))
+                        # Convert the image to base64 to embed it in HTML
+                        buffered = io.BytesIO()
+                        bbox_image_pil.save(buffered, format="JPEG")
+                        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                        bbox_image_html = f'<img src="data:image/jpeg;base64,{img_str}" style="width: 100px; height: 100px;">'
 
-                if class_name == "Con nguoi (Human)":
-                    detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {conf}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
+                    
 
-                else:
-                    nutrition = class_names[int(class_id)]["nutrition"]
-                    if nutrition:
-                        calories_desc = get_nutri_score_color("Calories", nutrition.get('Calories'), serving)
-                        fat_color, fat_desc = get_nutri_score_color("Fat", nutrition.get('Fat'), serving)
-                        saturates_color, saturates_desc = get_nutri_score_color("Saturates", nutrition.get('Saturates'), serving)
-                        sugar_color, sugar_desc = get_nutri_score_color("Sugar", nutrition.get('Sugar'), serving)
-                        salt_color, salt_desc = get_nutri_score_color("Salt", nutrition.get('Salt'), serving)
+                    if class_id in count_dict:
+                        count_dict[class_id] += 1
+                    else:
+                        count_dict[class_id] = 1
 
-                        percentage_contribution = calculate_nutrient_percentage(nutrition)
+                    if class_name == "Con nguoi (Human)":
+                        detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {conf}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
+
+                    else:
+                        nutrition = class_names[int(class_id)]["nutrition"]
+                        if nutrition:
+                            calories_desc = get_nutri_score_color("Calories", nutrition.get('Calories'), serving)
+                            fat_color, fat_desc = get_nutri_score_color("Fat", nutrition.get('Fat'), serving)
+                            saturates_color, saturates_desc = get_nutri_score_color("Saturates", nutrition.get('Saturates'), serving)
+                            sugar_color, sugar_desc = get_nutri_score_color("Sugar", nutrition.get('Sugar'), serving)
+                            salt_color, salt_desc = get_nutri_score_color("Salt", nutrition.get('Salt'), serving)
+
+                            percentage_contribution = calculate_nutrient_percentage(nutrition)
 
 
-                        nutrition_str = f"""
-<div class="each-nutri-container">
-    <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
-        <span class="each-nutri-name">Calories</span><br>
-        <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
-        <span id="calo-each-nutri-percentage" class="each-nutri-percentage">{percentage_contribution['Calories']:.1f}%</span>
+                            nutrition_str = f"""
+    <div class="each-nutri-container">
+        <div class="each-nutri-box" style="background-color: "transparent";">
+            {bbox_image_html}
+        </div>
+        <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
+            <span class="each-nutri-name">Calories</span><br>
+            <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
+            <span id="calo-each-nutri-percentage" class="each-nutri-percentage">{percentage_contribution['Calories']:.1f}%</span>
+        </div>
+        <div class="each-nutri-box" style="background-color: {fat_color};">
+            <span class="each-nutri-name">Fat</span><br>
+            <p class="each-nutri-number">{nutrition.get('Fat')} gram</p>
+            <span class="each-nutri-percentage">{percentage_contribution['Fat']:.1f}%</span>
+        </div>
+        <div class="each-nutri-box" style="background-color: {saturates_color};">
+            <span class="each-nutri-name">Saturates</span><br>
+            <p class="each-nutri-number">{nutrition.get('Saturates')} gram</p>
+            <span class="each-nutri-percentage">{percentage_contribution['Saturates']:.1f}%</span>
+        </div>
+        <div class="each-nutri-box" style="background-color: {sugar_color};">
+            <span class="each-nutri-name">Sugar</span><br>
+            <p class="each-nutri-number">{nutrition.get('Sugar')} gram</p>
+            <span class="each-nutri-percentage">{percentage_contribution['Sugar']:.1f}%</span>
+        </div>
+        <div class="each-nutri-box" style="background-color: {salt_color};">
+            <span class="each-nutri-name">Salt</span><br>
+            <p class="each-nutri-number">{nutrition.get('Salt')} gram</p>
+            <span class="each-nutri-percentage">{percentage_contribution['Salt']:.1f}%</span>
+        </div>
     </div>
-    <div class="each-nutri-box" style="background-color: {fat_color};">
-        <span class="each-nutri-name">Fat</span><br>
-        <p class="each-nutri-number">{nutrition.get('Fat')} gram</p>
-        <span class="each-nutri-percentage">{percentage_contribution['Fat']:.1f}%</span>
-    </div>
-    <div class="each-nutri-box" style="background-color: {saturates_color};">
-        <span class="each-nutri-name">Saturates</span><br>
-        <p class="each-nutri-number">{nutrition.get('Saturates')} gram</p>
-        <span class="each-nutri-percentage">{percentage_contribution['Saturates']:.1f}%</span>
-    </div>
-    <div class="each-nutri-box" style="background-color: {sugar_color};">
-        <span class="each-nutri-name">Sugar</span><br>
-        <p class="each-nutri-number">{nutrition.get('Sugar')} gram</p>
-        <span class="each-nutri-percentage">{percentage_contribution['Sugar']:.1f}%</span>
-    </div>
-    <div class="each-nutri-box" style="background-color: {salt_color};">
-        <span class="each-nutri-name">Salt</span><br>
-        <p class="each-nutri-number">{nutrition.get('Salt')} gram</p>
-        <span class="each-nutri-percentage">{percentage_contribution['Salt']:.1f}%</span>
-    </div>
-</div>
-                            """
+                                """
 
 
-                    detection_results += (
-                    f"""<p class="item-header"><b>{count_dict[class_id]} ({conf}%):</b> {class_name}</p>
-                    <p class="nutrition-header">Nutrition ({serving})</p>
-                    <p class="nutrition-facts">{nutrition_str}</p>
-                    <hr style="border: none; border-top: 1px dashed black; width: 80%;">
-                    """)
+                        detection_results += (
+                        f"""<p class="item-header"><b>{count_dict[class_id]} ({conf}%):</b> {class_name}</p>
+                        <p class="nutrition-header">Nutrition ({serving})</p>
+                        <p class="nutrition-facts">{nutrition_str}</p>
+                        <hr style="border: none; border-top: 1px dashed black; width: 80%;">
+                        """)
 
-                    for key in total_nutrition:
-                        if key in nutrition:
-                            total_nutrition[key] += nutrition[key]
+                        for key in total_nutrition:
+                            if key in nutrition:
+                                total_nutrition[key] += nutrition[key]
 
-                    nutrition_data.append((
-                        class_name,
-                        serving,
-                        conf,
-                        nutrition.get('Calories'),
-                        nutrition.get('Fat'),
-                        nutrition.get('Saturates'),
-                        nutrition.get('Sugar'),
-                        nutrition.get('Salt')
-                    ))
+                        nutrition_data.append((
+                            class_name,
+                            serving,
+                            conf,
+                            nutrition.get('Calories'),
+                            nutrition.get('Fat'),
+                            nutrition.get('Saturates'),
+                            nutrition.get('Sugar'),
+                            nutrition.get('Salt')
+                        ))
+
 
             total_nutrition_str = f"""
     <h5 class="total-nutrition-title">Total Nutrition Values</h5>
@@ -581,8 +627,7 @@ def detect_image_result(detected_image, model):
                     <p class="result-nutri-container" id="no-food-descr">The model did not detect any foods in the uploaded image.  
             Please try with a different image or adjust the model's 
             confidence threshold and try again.</p>
-                    """, unsafe_allow_html=True)
-        
+                    """, unsafe_allow_html=True)  
 
 
 def detect_image(conf, uploaded_file, model, url=False):
