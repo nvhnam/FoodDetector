@@ -87,7 +87,8 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
         youtube_id = convert_youtube_url(youtube_url)
         if youtube_id:
             valid_url = youtube_id
-            st.toast("Connecting", icon="🕒")
+            st.toast('Connecting', icon="🕒")
+            
             try:
                 results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu", vid_stride=5)
                 displayed_dishes = set()
@@ -256,6 +257,7 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                     the_csv = file.read()  
                 
                 st.toast("Prediction completed. Results saved to CSV.", icon="✅")
+                time.sleep(3000)
                 download_csv = st.download_button(label="Download Predictions CSV",
                                 data=the_csv,
                                 file_name=f"{time_format}.csv", 

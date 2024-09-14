@@ -242,12 +242,12 @@ def render_content():
     <style>
     /* Style the tab labels */
     button[data-baseweb="tab"] {
-        padding: calc(8px + 0.5vw) calc(8px + 1vw);
+        padding: calc(8px + 0.2vw) calc(8px + 0.5vw);
         gap: 0;
 
     }
     button[data-baseweb="tab"] p {
-        font-size: calc(10px + 0.5vw) !important;
+        font-size: calc(9px + 0.3vw) !important;
         font-weight: 500 !important;        
     }
     
@@ -340,7 +340,8 @@ def render_content():
             if uploaded_clip:
                 detect_video(conf=confidence, uploaded_file=uploaded_clip)
 
-            else: 
+            else:
+                st.markdown('<br><br>', unsafe_allow_html=True) 
                 st.subheader("Enter YouTube URL :tv:")
                 tube = st.empty()
                 with st.form("youtube_form"):

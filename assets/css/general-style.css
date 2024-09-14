@@ -423,3 +423,19 @@ h4.dataset-page {
 .human-confident {
 
 }
+/* [data-testid="stMarkdownContainer"] */
+.stToast {
+    height: calc(100px + 1vw);
+    gap: 0 !important;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+[data-testid="toastContainer"] span {
+    width: 50px;
+}
+/* 
+div.st-emotion-cache-1x51vsn.elibz2u0 {
+    gap: 0 !important;
+} */
