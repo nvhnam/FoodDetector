@@ -118,9 +118,9 @@ def render_content():
 
         st.markdown(f'''
     <ul class="define introduction" style="margin-top: 0; margin-bottom: 0;">
-        <li class="define-li home-page">FoodDetector uses the <strong>YOLOv10m</strong> pretrained models for fine-tuning with <code>VietFood57</code>, 
-        a new custom-made Vietnamese food dataset created for detecting local dishes and achieved a <code>mAP50</code> of <code>0.934</code>.</li>
-        <li class="define-li home-page">It can be used to detect <a href="/dataset" target="_self">57</a> Vietnamese dishes from a picture, video, webcam, and an IP camera through RTSP.</li>
+        <li class="define-li home-page">FoodDetector uses the <strong>YOLOv10m</strong> pretrained models for fine-tuning with <code>VietFood67</code>, 
+        an enhanced custom-made Vietnamese food dataset created for detecting local dishes and achieved a <code>mAP50</code> of <code>0.934</code>.</li>
+        <li class="define-li home-page">It can be used to detect <a href="/dataset" target="_self">67</a> Vietnamese dishes from a picture, video, webcam, and an IP camera through RTSP.</li>
     </ul>
                     ''', unsafe_allow_html=True)
 
@@ -338,12 +338,12 @@ def render_content():
             
             uploaded_clip = st.file_uploader("Choose a clip", accept_multiple_files=False, type=['mp4'])
             if uploaded_clip:
-                detect_video(conf=confidence, uploaded_file=uploaded_clip)
+                detect_video(conf=confidence, uploaded_file=uploaded_clip, model=model1)
 
             else:
                 st.markdown('<br><br>', unsafe_allow_html=True) 
                 st.subheader("Enter YouTube URL :tv:")
-                tube = st.empty()
+                # tube = st.empty()
                 with st.form("youtube_form"):
                     col1, col2 = st.columns([0.8, 0.2], gap="medium")
                     with col1:
@@ -352,7 +352,7 @@ def render_content():
                         submitted = st.form_submit_button("Predict", use_container_width=True)
                 if submitted and youtube_url:            
                     _display_detected_frame(conf=confidence, model=model1, 
-                                            st_frame=tube,
+                                           
                                             youtube_url=youtube_url)
 
         with tab3:
@@ -380,7 +380,7 @@ def render_content():
             with st.form("ip_camera_form"):
                 col1, col2 = st.columns([2, 8])
                 with col1:
-                    st.write("rtsp://admin:")  # Place the static text on the same line
+                    st.write("rtsp://admin:") 
                 with col2:
                     address = st.text_input(
                         "Label", 

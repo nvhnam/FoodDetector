@@ -82,7 +82,7 @@ def convert_youtube_url(url):
     return None
 
 
-def _display_detected_frame(conf, model, st_frame, youtube_url=""):
+def _display_detected_frame(conf, model, youtube_url=""):
     if youtube_url:
         youtube_id = convert_youtube_url(youtube_url)
         if youtube_id:
@@ -90,7 +90,7 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
             st.toast('Connecting', icon="🕒")
             
             try:
-                results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu", vid_stride=5)
+                results = model.track(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu", vid_stride=1)
                 displayed_dishes = set()
                 total_nutrition = {
                     "Calories": 0,
@@ -108,20 +108,54 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                 stop_button = st.button("Stop")
                 stop_pressed = False
 
+                st_frame = st.empty()
+
                 frame_count = 0
                 start_time = time.time()
 
                 total_nutrition_placeholder = st.empty()
                 st.markdown("""<br>
                         <h5 class="detection-results">Detection Results</h5><p class="small-text-below-results">We found the following foods in your meal</p>""", unsafe_allow_html=True)
-                nutrition_placeholder = st.empty()
+                # nutrition_placeholder = st.empty()
 
-                for r in results:          
+                for r in results:    
+                    im_bgr = r.plot() 
+                    frame_count += 1
+                    elapsed_time = time.time() - start_time
+                    if elapsed_time >= 1.0:
+                        fps = frame_count / elapsed_time
+                        start_time = time.time()
+                        frame_count = 0
+                    cv2.putText(im_bgr, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 4) 
+
+                    im_rgb = Image.fromarray(im_bgr[..., ::-1])  
+                    im_rgb_resized = im_rgb.resize((640, 640))        
+                    st_frame.image(im_rgb_resized, caption='Predicted Video', use_column_width=True)      
                     for pred in r.boxes: 
                         class_id = int(pred.cls[0].item())
                         class_name = class_names[int(class_id)]["name"]
                         confident = int(round(pred.conf[0].item(), 2)*100)
                         serving = class_names[int(class_id)]["serving_type"]
+
+                        if isinstance(pred.xyxy, torch.Tensor):
+                            boxes = pred.xyxy.cpu().numpy()
+                        else:
+                            boxes = pred.xyxy.numpy()
+                    
+                        image_np = r.orig_img 
+                        
+                        bounding_box_images = extract_bounding_box_image(image_np, boxes)
+
+                        bbox_image_html = ""
+                        if bounding_box_images:
+                            bbox_image = bounding_box_images[0]
+                            bbox_image_pil = Image.fromarray(cv2.cvtColor(bbox_image, cv2.COLOR_BGR2RGB))
+
+                            buffered = io.BytesIO()
+                            bbox_image_pil.save(buffered, format="JPEG")
+                            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                            bbox_image_html = f'<img src="data:image/jpeg;base64,{img_str}" class="img-each-nutri" ">'
+
 
                         if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
                             detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {confident}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
@@ -144,6 +178,9 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
 
                                 nutrition_str = f"""
 <div class="each-nutri-container">
+    <div class="each-nutri-box" style="background-color: "transparent";">
+        {bbox_image_html}
+    </div>
     <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
         <span class="each-nutri-name">Calories</span><br>
         <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
@@ -193,18 +230,7 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                                 nutrition.get('Sugar'),
                                 nutrition.get('Salt')
                             ))
-                    im_bgr = r.plot() 
-                    frame_count += 1
-                    elapsed_time = time.time() - start_time
-                    if elapsed_time >= 1.0:
-                        fps = frame_count / elapsed_time
-                        start_time = time.time()
-                        frame_count = 0
-                    cv2.putText(im_bgr, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 4) 
-
-                    im_rgb = Image.fromarray(im_bgr[..., ::-1])  
-                    im_rgb_resized = im_rgb.resize((640, 640))        
-                    st_frame.image(im_rgb_resized, caption='Predicted Video', use_column_width=True)
+                    
 
                     if stop_button:
                         stop_pressed = True
@@ -214,9 +240,8 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
                 if new_detections:
                     scrollable_textbox = f"""<div class="result-nutri-container">{detection_results}</div>"""
                     
-                    nutrition_placeholder.markdown(scrollable_textbox, unsafe_allow_html=True)
+                    st.markdown(scrollable_textbox, unsafe_allow_html=True)
                     
-                displayed_dishes.clear()
 
                 total_nutrition_str = f"""
     <h5 class="total-nutrition-title">Total Nutrition Values</h5>
@@ -245,7 +270,9 @@ def _display_detected_frame(conf, model, st_frame, youtube_url=""):
 """
 
                 total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
-                # rows = zip(food_names1, confidences1)
+
+                displayed_dishes.clear()
+
 
                 # with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir=tempfile.gettempdir()) as csv_file:
@@ -462,7 +489,7 @@ def detect_image_result(detected_image, model):
                     if bounding_box_images:
                         bbox_image = bounding_box_images[0]
                         bbox_image_pil = Image.fromarray(cv2.cvtColor(bbox_image, cv2.COLOR_BGR2RGB))
-                        # Convert the image to base64 to embed it in HTML
+
                         buffered = io.BytesIO()
                         bbox_image_pil.save(buffered, format="JPEG")
                         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
@@ -492,6 +519,9 @@ def detect_image_result(detected_image, model):
 
                             nutrition_str = f"""
     <div class="each-nutri-container">
+        <div class="each-nutri-box" style="background-color: "transparent";">
+            {bbox_image_html}
+        </div>
         <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
             <span class="each-nutri-name">Calories</span><br>
             <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
@@ -523,7 +553,7 @@ def detect_image_result(detected_image, model):
 
                         detection_results += (
                         f"""<p class="item-header">{count_dict[class_id]} ({conf}%): <b>{class_name}</b></p>
-                        <p class="nutrition-header">Nutrition ({serving}) </p><img style="background-color: "transparent">{bbox_image_html}</img>
+                        <p class="nutrition-header">Nutrition ({serving}) </p>
                         <p class="nutrition-facts">{nutrition_str}</p>
                         <hr style="border: none; border-top: 1px dashed black; width: 80%;">
                         """)
@@ -746,6 +776,26 @@ def detect_camera(conf, model, address):
                         confident = int(round(pred.conf[0].item(), 2)*100)
                         serving = class_names[int(class_id)]["serving_type"]
 
+                        if isinstance(pred.xyxy, torch.Tensor):
+                            boxes = pred.xyxy.cpu().numpy()
+                        else:
+                            boxes = pred.xyxy.numpy()
+                    
+                        image_np = r.orig_img 
+                        
+                        bounding_box_images = extract_bounding_box_image(image_np, boxes)
+
+                        bbox_image_html = ""
+                        if bounding_box_images:
+                            bbox_image = bounding_box_images[0]
+                            bbox_image_pil = Image.fromarray(cv2.cvtColor(bbox_image, cv2.COLOR_BGR2RGB))
+
+                            buffered = io.BytesIO()
+                            bbox_image_pil.save(buffered, format="JPEG")
+                            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                            bbox_image_html = f'<img src="data:image/jpeg;base64,{img_str}" class="img-each-nutri" ">'
+
+
                         if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
                             detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {confident}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
                             displayed_dishes.add(class_name)
@@ -766,6 +816,9 @@ def detect_camera(conf, model, address):
 
                                 nutrition_str = f"""
 <div class="each-nutri-container">
+    <div class="each-nutri-box" style="background-color: "transparent";">
+        {bbox_image_html}
+    </div>
     <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
         <span class="each-nutri-name">Calories</span><br>
         <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
@@ -806,10 +859,14 @@ def detect_camera(conf, model, address):
                                 for key in total_nutrition:
                                     if key in nutrition:
                                         total_nutrition[key] += nutrition[key]
+               
+               
                 if new_detections:
                     scrollable_textbox = f"""<div class="result-nutri-container">{detection_results}</div>"""
                     
                     st.markdown(scrollable_textbox, unsafe_allow_html=True)
+                
+                
                 total_nutrition_str = f"""
     <h5 class="total-nutrition-title">Total Nutrition Values</h5>
     <div class="total-nutrition-container">
@@ -836,6 +893,7 @@ def detect_camera(conf, model, address):
     </div>
 """
 
+                
                 total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
             else:
                 break
@@ -853,6 +911,7 @@ class Detection(NamedTuple):
     class_name: str
     confident: float
     serving: str
+    bbox_image_html: str
 
 class VideoTransformer(VideoTransformerBase):
     def __init__(self, conf, model):
@@ -871,12 +930,31 @@ class VideoTransformer(VideoTransformerBase):
             im_bgr = r.plot()
             for pred in r.boxes:
                 class_id = int(pred.cls[0].item())
+                if isinstance(pred.xyxy, torch.Tensor):
+                    boxes = pred.xyxy.cpu().numpy()
+                else:
+                    boxes = pred.xyxy.numpy()
+            
+                image_np = r.orig_img 
+                
+                bounding_box_images = extract_bounding_box_image(image_np, boxes)
+
+                bbox_image_html = ""
+                if bounding_box_images:
+                    bbox_image = bounding_box_images[0]
+                    bbox_image_pil = Image.fromarray(cv2.cvtColor(bbox_image, cv2.COLOR_BGR2RGB))
+
+                    buffered = io.BytesIO()
+                    bbox_image_pil.save(buffered, format="JPEG")
+                    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                    bbox_image_html = f'<img src="data:image/jpeg;base64,{img_str}" class="img-each-nutri" ">'
                 detections.append(
                     Detection(
                         class_id = int(pred.cls[0].item()),
                         class_name = class_names[int(class_id)]["name"],
                         confident = int(round(pred.conf[0].item(), 2)*100),
                         serving = class_names[int(class_id)]["serving_type"],
+                        bbox_image_html = bbox_image_html
                     )
                 )
 
@@ -938,6 +1016,7 @@ def detect_webcam(conf, model):
                 class_name = detection.class_name
                 confident = detection.confident
                 serving = detection.serving
+                bbox_image_html = detection.bbox_image_html
                 
                 if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
                     detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {confident}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
@@ -960,6 +1039,9 @@ def detect_webcam(conf, model):
 
                         nutrition_str = f"""
 <div class="each-nutri-container">
+    <div class="each-nutri-box" style="background-color: "transparent";">
+        {bbox_image_html}
+    </div>
     <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
         <span class="each-nutri-name">Calories</span><br>
         <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
@@ -1033,8 +1115,6 @@ def detect_webcam(conf, model):
     result_queue.queue.clear()
 
 
-
-
 import onnxruntime as ort
 
 model_path = "./model/yolov10/YOLOv10m_new_total_VN_5_SGD.onnx"
@@ -1080,15 +1160,14 @@ def postprocess(outputs, frame, original_size, conf, model):
                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 255, 0), thickness)
         return frame
 
-def detect_video(conf, uploaded_file):
+def detect_video(conf, uploaded_file, model):
     if uploaded_file:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_input_file:
             temp_input_file.write(uploaded_file.read())
             temp_input_file_path = temp_input_file.name
-        detect_from_file(conf=conf, video_file=temp_input_file_path)
+        detect_from_file(conf=conf, video_file=temp_input_file_path, model=model)
 
-def detect_from_file(conf, video_file):
-    session, input_name, output_name = load_onnx_model()
+def detect_from_file(conf, video_file, model):
     if video_file:
         cap = cv2.VideoCapture(video_file)
 
@@ -1109,17 +1188,7 @@ def detect_from_file(conf, video_file):
 
     st_frame = st.empty()
 
-    frames1 = []
-    displayed_dishes = set()
-    nutrition_data = []
     
-    total_nutrition = {
-        "Calories": 0,
-        "Fat": 0,
-        "Saturates": 0,
-        "Sugar": 0,
-        "Salt": 0
-    }
 
     col1, col2, col3 = st.columns(3, gap="large")
     with col1:
@@ -1141,7 +1210,20 @@ def detect_from_file(conf, video_file):
                         <h5 class="detection-results">Detection Results</h5><p class="small-text-below-results">We found the following foods in your meal</p>""", unsafe_allow_html=True)
     
 
+    displayed_dishes = set()
+    nutrition_data = []
+    
+    total_nutrition = {
+        "Calories": 0,
+        "Fat": 0,
+        "Saturates": 0,
+        "Sugar": 0,
+        "Salt": 0
+    }
     while True:
+
+        success, image = cap.read()
+
         if skip_frames > 0:
             cap.set(cv2.CAP_PROP_POS_FRAMES, cap.get(cv2.CAP_PROP_POS_FRAMES) + skip_frames)
             skip_frames = 0
@@ -1152,130 +1234,123 @@ def detect_from_file(conf, video_file):
         if stop_button:
             stop_pressed = True
 
-        ret, frame = cap.read()
-        if not ret or stop_pressed:
+        if not success or stop_pressed:
             break
 
-        input_frame = preprocess(frame)
-        outputs = session.run([output_name], {input_name: input_frame})
-        detected_frame = postprocess(outputs, frame, original_size, conf, model=session)
+        results = model.predict(source=image, conf=conf, imgsz=640, save=False, device="cpu")
 
         new_detections = False  
         detection_results = ""
-        
-        for output_array in outputs:        
-            for output in output_array[0]:
-                x1, y1, x2, y2, score, class_id = output[:6]
-                if score > conf:
-                    if class_id < len(class_names):
-                        class_name = class_names[int(class_id)]["name"]
-                    label = f"{class_name}: {score:.2f}"
-                    frames1.append(frame_count)
-                    confident = round(score*100)
-                    serving = class_names[int(class_id)]["serving_type"]
+
+            
+        for r in results:
+            im_bgr = r.plot()           
+            frame_count += 1
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= 1.0:
+                fps = frame_count / elapsed_time
+                start_time = time.time()
+                frame_count = 0
+            cv2.putText(im_bgr, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+            im_rgb = Image.fromarray(im_bgr[..., ::-1])
+            st_frame.image(im_rgb, caption='Predicted video', use_column_width=True)
+
+    
+            for pred in r.boxes:
+                class_id = int(pred.cls[0].item())
+                class_name = class_names[int(class_id)]["name"]
+                confident = int(round(pred.conf[0].item(), 2)*100)
+                serving = class_names[int(class_id)]["serving_type"]
+
+                if isinstance(pred.xyxy, torch.Tensor):
+                    boxes = pred.xyxy.cpu().numpy()
+                else:
+                    boxes = pred.xyxy.numpy()
+            
+                image_np = r.orig_img 
+                
+                bounding_box_images = extract_bounding_box_image(image_np, boxes)
+
+                bbox_image_html = ""
+                if bounding_box_images:
+                    bbox_image = bounding_box_images[0]
+                    bbox_image_pil = Image.fromarray(cv2.cvtColor(bbox_image, cv2.COLOR_BGR2RGB))
+
+                    buffered = io.BytesIO()
+                    bbox_image_pil.save(buffered, format="JPEG")
+                    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                    bbox_image_html = f'<img src="data:image/jpeg;base64,{img_str}" class="img-each-nutri" ">'
 
 
-
-                    if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
-                        detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {confident}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
-
+                if class_name == "Con nguoi (Human)" and class_name not in displayed_dishes:
+                    detection_results += f"<p class='human-class-name'><b>Class name:</b> {class_name}</p><p class='human-confident'><b>Confidence:</b> {confident}%</p><hr style='border: none; border-top: 1px dashed black; width: 80%;'>"
+                    displayed_dishes.add(class_name)
+                    new_detections = True
+                elif class_name not in displayed_dishes:
+                    nutrition = class_names[int(class_id)]["nutrition"]
+                    if nutrition:
                         displayed_dishes.add(class_name)
                         new_detections = True
-                    elif class_name not in displayed_dishes:
-                        nutrition = class_names[int(class_id)]["nutrition"]
-                        if nutrition:
-                            displayed_dishes.add(class_name)
-                            new_detections = True
 
-                            calories_desc = get_nutri_score_color("Calories", nutrition.get('Calories'), serving)
-                            fat_color, fat_desc = get_nutri_score_color("Fat", nutrition.get('Fat'), serving)
-                            saturates_color, saturates_desc = get_nutri_score_color("Saturates", nutrition.get('Saturates'), serving)
-                            sugar_color, sugar_desc = get_nutri_score_color("Sugar", nutrition.get('Sugar'), serving)
-                            salt_color, salt_desc = get_nutri_score_color("Salt", nutrition.get('Salt'), serving)
+                        calories_desc = get_nutri_score_color("Calories", nutrition.get('Calories'), serving)
+                        fat_color, fat_desc = get_nutri_score_color("Fat", nutrition.get('Fat'), serving)
+                        saturates_color, saturates_desc = get_nutri_score_color("Saturates", nutrition.get('Saturates'), serving)
+                        sugar_color, sugar_desc = get_nutri_score_color("Sugar", nutrition.get('Sugar'), serving)
+                        salt_color, salt_desc = get_nutri_score_color("Salt", nutrition.get('Salt'), serving)
 
-                            percentage_contribution = calculate_nutrient_percentage(nutrition)
+                        percentage_contribution = calculate_nutrient_percentage(nutrition)
 
-                            nutrition_str = f"""
-<div class="each-nutri-container">
-    <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
-        <span class="each-nutri-name">Calories</span><br>
-        <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
-        <span id="calo-each-nutri-percentage" class="each-nutri-percentage">{percentage_contribution['Calories']:.1f}%</span>
-    </div>
-    <div class="each-nutri-box" style="background-color: {fat_color};">
-        <span class="each-nutri-name">Fat</span><br>
-        <p class="each-nutri-number">{nutrition.get('Fat')} gram</p>
-        <span class="each-nutri-percentage">{percentage_contribution['Fat']:.1f}%</span>
-    </div>
-    <div class="each-nutri-box" style="background-color: {saturates_color};">
-        <span class="each-nutri-name">Saturates</span><br>
-        <p class="each-nutri-number">{nutrition.get('Saturates')} gram</p>
-        <span class="each-nutri-percentage">{percentage_contribution['Saturates']:.1f}%</span>
-    </div>
-    <div class="each-nutri-box" style="background-color: {sugar_color};">
-        <span class="each-nutri-name">Sugar</span><br>
-        <p class="each-nutri-number">{nutrition.get('Sugar')} gram</p>
-        <span class="each-nutri-percentage">{percentage_contribution['Sugar']:.1f}%</span>
-    </div>
-    <div class="each-nutri-box" style="background-color: {salt_color};">
-        <span class="each-nutri-name">Salt</span><br>
-        <p class="each-nutri-number">{nutrition.get('Salt')} gram</p>
-        <span class="each-nutri-percentage">{percentage_contribution['Salt']:.1f}%</span>
-    </div>
-</div>
-                            """
+                        nutrition_str = f"""
+                            <div class="each-nutri-container">
+                            <div class="each-nutri-box" style="background-color: "transparent";">
+                                {bbox_image_html}
+                            </div>
+                            <div  id="calo-each-nutri-box" class="each-nutri-box" style="background-color: transparent;">
+                            <span class="each-nutri-name">Calories</span><br>
+                            <p class="each-nutri-number">{nutrition.get('Calories')} kcal</p>
+                            <span id="calo-each-nutri-percentage" class="each-nutri-percentage">{percentage_contribution['Calories']:.1f}%</span>
+                            </div>
+                            <div class="each-nutri-box" style="background-color: {fat_color};">
+                            <span class="each-nutri-name">Fat</span><br>
+                            <p class="each-nutri-number">{nutrition.get('Fat')} gram</p>
+                            <span class="each-nutri-percentage">{percentage_contribution['Fat']:.1f}%</span>
+                            </div>
+                            <div class="each-nutri-box" style="background-color: {saturates_color};">
+                            <span class="each-nutri-name">Saturates</span><br>
+                            <p class="each-nutri-number">{nutrition.get('Saturates')} gram</p>
+                            <span class="each-nutri-percentage">{percentage_contribution['Saturates']:.1f}%</span>
+                            </div>
+                            <div class="each-nutri-box" style="background-color: {sugar_color};">
+                            <span class="each-nutri-name">Sugar</span><br>
+                            <p class="each-nutri-number">{nutrition.get('Sugar')} gram</p>
+                            <span class="each-nutri-percentage">{percentage_contribution['Sugar']:.1f}%</span>
+                            </div>
+                            <div class="each-nutri-box" style="background-color: {salt_color};">
+                            <span class="each-nutri-name">Salt</span><br>
+                            <p class="each-nutri-number">{nutrition.get('Salt')} gram</p>
+                            <span class="each-nutri-percentage">{percentage_contribution['Salt']:.1f}%</span>
+                            </div>
+                            </div>
+                    """
 
-                            detection_results += (
-                    f"""<p class="item-header">{confident}%: <b>{class_name}</b></p>
-                    <p class="nutrition-header">Nutrition ({serving})</p>
-                    <p class="nutrition-facts">{nutrition_str}</p>
-                    <hr style="border: none; border-top: 1px dashed black; width: 80%;">
-                    """)
-
-                            for key in total_nutrition:
-                                if key in nutrition:
-                                    total_nutrition[key] += nutrition[key]
-
-                        nutrition_data.append((
-                            class_name,
-                            serving,
-                            confident,
-                            nutrition.get('Calories'),
-                            nutrition.get('Fat'),
-                            nutrition.get('Saturates'),
-                            nutrition.get('Sugar'),
-                            nutrition.get('Salt')
-                        ))
-
-                    frames1.append(frame_count)
-
+                        detection_results += (
+            f"""<p class="item-header">{confident}%: <b>{class_name}</b></p>
+            <p class="nutrition-header">Nutrition ({serving})</p>
+            <p class="nutrition-facts">{nutrition_str}</p>
+            <hr style="border: none; border-top: 1px dashed black; width: 80%;">
+            """)
+                        
+                        for key in total_nutrition:
+                            if key in nutrition:
+                                total_nutrition[key] += nutrition[key]
+              
         if new_detections:
             scrollable_textbox = f"""<div class="result-nutri-container">{detection_results}</div>"""
             
             st.markdown(scrollable_textbox, unsafe_allow_html=True)
 
-        frame_count += 1
-        elapsed_time = time.time() - start_time
-        if elapsed_time >= 1.0:
-            fps = frame_count / elapsed_time
-            start_time = time.time()
-            frame_count = 0
-        cv2.putText(detected_frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-        im_rgb = Image.fromarray(detected_frame[..., ::-1])
-        st_frame.image(im_rgb, caption='Predicted video', use_column_width=True)
-        out.write(detected_frame)
-
-        if stop_button:
-            stop_pressed = True
-            stop_button = None
-            break
-
-    cap.release()
-    out.release()
-    displayed_dishes.clear()
-
-    total_nutrition_str = f"""
+        total_nutrition_str = f"""
     <h5 class="total-nutrition-title">Total Nutrition Values</h5>
     <div class="total-nutrition-container">
         <div class="total-nutri-box">
@@ -1300,7 +1375,18 @@ def detect_from_file(conf, video_file):
         </div>
     </div>
 """
-    total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
+        total_nutrition_placeholder.markdown(total_nutrition_str, unsafe_allow_html=True)
+
+
+        if stop_button:
+            stop_pressed = True
+            stop_button = None
+            break
+
+    cap.release()
+    out.release()
+    displayed_dishes.clear()
+
 
     # with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", dir="/tmp") as csv_file:
     with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', dir=tempfile.gettempdir()) as csv_file:
