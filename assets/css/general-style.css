@@ -456,12 +456,14 @@ h4.dataset-page {
 
 .each-nutri-box {
     padding: 2px;
-    padding-bottom: calc(6px + 0.3vw);
+    padding-bottom: 7px;
     border-radius: 23px;
     text-align: center;
     width: 12%;
+    max-height: 90px;
     min-width: 100px;
     background-color: transparent;
+    overflow: hidden;
 }
 .each-nutri-name {
     font-size: calc(7px + 0.2vw);
@@ -552,9 +554,9 @@ div.st-emotion-cache-1x51vsn.elibz2u0 {
 
 
 .img-each-nutri {
-    height: 35px;
-    margin-left: 10px;
-    border-radius: 5px;
+    width: 100%;
+    border-radius: 23px;
+    height: 90px;
 }
 
 .detection-results {
