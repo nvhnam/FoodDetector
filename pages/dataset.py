@@ -71,6 +71,12 @@ st.markdown("""
             text-align: center;
         }
 
+        @media (min-width: 2000px) {
+            .button {
+                font-size: calc(12px + 0.15vw);
+            }
+        }
+        
         .button:hover {
             background-color: var(--button-color-yellow-hover);
             color: var(--grey-hover) !important;

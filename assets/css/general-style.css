@@ -465,6 +465,7 @@ h4.dataset-page {
     background-color: transparent;
     overflow: hidden;
 }
+
 .each-nutri-name {
     font-size: calc(7px + 0.2vw);
     font-weight: 400;
@@ -483,6 +484,23 @@ h4.dataset-page {
     padding: 5px 25px;
     border-radius: 20px;
 }
+
+@media (min-width: 2000px) {
+    .each-nutri-box {
+        max-height: 100px;
+    }
+    .each-nutri-percentage{
+        padding: 5px 22px;
+    }
+    #calo-each-nutri-percentage {
+        padding: 5px 20px;
+    }
+    .each-nutri-number {
+        font-size: calc(14px + 0.1vw);
+        margin-bottom: 3px;
+    }
+}
+
 
 .item-header {
     font-size: calc(12px + 0.2vw);
