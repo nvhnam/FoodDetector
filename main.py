@@ -315,16 +315,16 @@ def render_content():
 
                 # detections = detect_image_onnx(model, uploaded_file, confidence)
 
-            st.markdown('<br><br>', unsafe_allow_html=True)
-            st.subheader("Enter a picture URL 	:link:")
-            with st.form("picture_form"):
-                col1, col2 = st.columns([0.8, 0.2], gap="medium")
-                with col1:
-                    picture_url = st.text_input("Label", label_visibility="collapsed", placeholder="https://ultralytics.com/images/bus.jpg")
-                with col2:
-                    submitted = st.form_submit_button("Predict", use_container_width=True)
-            if submitted and picture_url:
-                detect_image(confidence, model=model1, uploaded_file=picture_url, url=True)            
+            # st.markdown('<br><br>', unsafe_allow_html=True)
+            # st.subheader("Enter a picture URL 	:link:")
+            # with st.form("picture_form"):
+            #     col1, col2 = st.columns([0.8, 0.2], gap="medium")
+            #     with col1:
+            #         picture_url = st.text_input("Label", label_visibility="collapsed", placeholder="https://ultralytics.com/images/bus.jpg")
+            #     with col2:
+            #         submitted = st.form_submit_button("Predict", use_container_width=True)
+            # if submitted and picture_url:
+            #     detect_image(confidence, model=model1, uploaded_file=picture_url, url=True)            
 
         with tab2:
                         
