@@ -90,7 +90,7 @@ def _display_detected_frame(conf, model, youtube_url=""):
             st.toast('Connecting', icon="🕒")
             
             try:
-                results = model.track(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu", vid_stride=1)
+                results = model(source=valid_url, stream=True, conf=conf, imgsz=640, save=True, device="cpu", vid_stride=1)
                 displayed_dishes = set()
                 total_nutrition = {
                     "Calories": 0,
