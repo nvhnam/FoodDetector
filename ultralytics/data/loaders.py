@@ -523,7 +523,7 @@ def autocast_list(source):
     return files
 
 
-def get_best_youtube_url(url, method="pafy"):
+def get_best_youtube_url(url, method="yt-dlp"):
     """
     Retrieves the URL of the best quality MP4 video stream from a given YouTube video.
 
