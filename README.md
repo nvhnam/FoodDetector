@@ -50,7 +50,7 @@ This project has been the foundation of two research papers:
 
 ## 📁 Dataset
 
-We created and released the **VietFood67** dataset for training and evaluation, containing 67 classes and 33k images of common Vietnamese dishes with annotated bounding boxes.
+We created and released the **VietFood67** dataset for training and evaluation, containing 68 classes (an extra class for human face detection) and 33k images of common Vietnamese dishes with annotated bounding boxes.
 
 📦 [View VietFood67 on Kaggle](#) (currently uploading the dataset, please wait as the zip file is 26 GB)
 
