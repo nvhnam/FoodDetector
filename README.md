@@ -1,4 +1,4 @@
-# 🍜 FoodDetector
+# 🕵️‍♂️ FoodDetector
 
 **FoodDetector** is a real-time web-based application for detecting and recognizing Vietnamese dishes using a custom YOLOv10 model trained on the VietFood67 - the **largest** Vietnamese food dataset. This system empowers users with instant nutritional feedback, aiding in dietary awareness and health-conscious decision-making.
 
