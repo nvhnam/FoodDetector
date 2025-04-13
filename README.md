@@ -103,7 +103,7 @@ streamlit run app.py
 ## 📈 Future Work
 
 - 📱 **Mobile App with AR**: Building a mobile version featuring AR overlays that display 3D real-time nutrient values directly on detected dishes.  
-  > 🔍 *Currently seeking passionate collaborators with experience in **Unity** and **AR development** to bring this vision to life!*
+  > 🔍 *Currently seeking passionate collaborators with experience in **Unity** and **AR development** to bring this vision to life! And be the co-author of this new paper.*
 
 - 🧠 Integration with AI nutritionist agents (CrewAI, LangChain) for personalized meal recommendations.
   > 🔍 *Research is currently in progress.*
