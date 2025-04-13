@@ -9,7 +9,7 @@
 - Real-time Vietnamese dish detection via images, videos, webcam input and IP camera (RTSP).
 - Nutritional breakdown for each detected dish: Calories, Fat, Saturates, Sugar, Salt.
 - Traffic light system for nutrient awareness.
-- Powered by a custom-trained YOLOv10 model on our largest Vietnamese food image dataset [VietFood67 dataset](https://www.kaggle.com/).
+- Powered by a custom-trained YOLOv10 model on our largest Vietnamese food image dataset [VietFood67 dataset](https://www.kaggle.com/datasets/thomasnguyen6868/vietfood68).
 - Developed using **Python**, **Streamlit**, and **OpenCV**.
 
 ---
@@ -18,13 +18,13 @@
 
 This project has been the foundation of two research papers:
 
-1. **"It’s Yummy: Real-Time Detection and Recognition of Vietnamese Dishes"**  
+1. **"Now I Know What I am Eating: Real-time Tracking and Nutritional Insights Using VietFood67 to Enhance User Experience"**  
+   🏆 *Best Paper Runner-up Award at SOICT 2024*  
+   🔗 [View Paper](https://drive.google.com/file/d/19FcdIjc2kdT4ocdUMtztcZSqOx39qTUe/view)
+   
+2. **"It’s Yummy: Real-Time Detection and Recognition of Vietnamese Dishes"**  
    📌 *Presented at ICCIT 2024, British University Vietnam (BUV)*  
    🔗 [View Paper](https://drive.google.com/file/d/15oVhSYscpNW5pSEFjiXLNHrGNyDi6vjt/view) 
-
-2. **"Now I Know What I am Eating: Real-time Tracking and Nutritional Insights Using VietFood67 to Enhance User Experience"**  
-   🏆 *Best Paper Runner-up Award at SOICT 2024*  
-   🔗 [View Paper](https://drive.google.com/file/d/19FcdIjc2kdT4ocdUMtztcZSqOx39qTUe/view) 
 
 ---
 
@@ -52,7 +52,7 @@ This project has been the foundation of two research papers:
 
 We created and released the **VietFood67** dataset for training and evaluation, containing 68 classes (an extra class for human face detection) and 33k images of common Vietnamese dishes with annotated bounding boxes.
 
-📦 [View VietFood67 on Kaggle](#) (currently uploading the dataset, please wait as the zip file is 26 GB)
+📦 [View VietFood67 on Kaggle](https://www.kaggle.com/datasets/thomasnguyen6868/vietfood68)
 
 ---
 
@@ -64,7 +64,7 @@ If you find **FoodDetector** or the **VietFood67** dataset helpful in your resea
 - 📊 Star the [VietFood67 dataset on Kaggle](#) to show your support.
 - 📄 **Cite our papers** in your publications to help us continue our research and development.
 
-> 🆓 The **VietFood67** dataset is free to use for research and educational purposes **with proper citation**. Commercial use or redistribution is **not permitted**.
+> 🆓 The FoodDetector and **VietFood67** dataset are free to use for research and educational purposes **with proper citation**. Commercial use or redistribution is **not permitted**.
 
 ---
 
@@ -99,10 +99,16 @@ If you find **FoodDetector** or the **VietFood67** dataset helpful in your resea
 ---
 
 ## 📈 Future Work
-- Mobile app version with AR overlay for 3D real-time nutrient values display. (Currently looking for collaborators to work on Unity)
-- Integration with AI nutritionist agents (CrewAI, LangChain).
-- Real-time user health feedback based on demographics.
-- Expand dataset with more regional dishes.
+
+- 📱 **Mobile App with AR**: Building a mobile version featuring AR overlays that display 3D real-time nutrient values directly on detected dishes.  
+  > 🔍 *Currently seeking passionate collaborators with experience in **Unity** and **AR development** to bring this vision to life!*
+
+- 🧠 Integration with AI nutritionist agents (CrewAI, LangChain) for personalized meal recommendations.
+  > 🔍 *Research is currently in progress.*
+
+- 🏥 Real-time health feedback based on user demographics (age, gender, height, weight, eating patterns).
+- 🍲 Expand the VietFood67 dataset with more regional Vietnamese dishes for greater diversity and recognition accuracy.
+
 
 ---
 
