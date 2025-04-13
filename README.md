@@ -64,7 +64,7 @@ If you find **FoodDetector** or the **VietFood67** dataset helpful in your resea
 - 📊 Star the [VietFood67 dataset on Kaggle](https://www.kaggle.com/datasets/thomasnguyen6868/vietfood68) to show your support.
 - 📄 **Cite our papers** in your publications to help us continue our research and development.
 
-> 🆓 The FoodDetector and **VietFood67** dataset are free to use for research and educational purposes **with proper citation**. Commercial use or redistribution is **not permitted**.
+> 🆓 The **FoodDetector** and **VietFood67** dataset are free to use for research and educational purposes **with proper citation**. Commercial use or redistribution is **not permitted**.
 
 ---
 
