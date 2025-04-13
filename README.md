@@ -90,12 +90,14 @@ If you find **FoodDetector** or the **VietFood67** dataset helpful in your resea
 - Pandas, Numpy, etc.
 
 ### Run Locally
-- git clone https://github.com/yourusername/FoodDetector.git
-- cd FoodDetector
-- git checkout v2 
-- pip install -r requirements.txt
-- streamlit run app.py
-
+<pre>
+git clone https://github.com/nvhnam/FoodDetector.git
+cd FoodDetector
+git checkout v2 
+pip install -r requirements.txt
+streamlit run app.py
+</pre>
+   
 ---
 
 ## 📈 Future Work
