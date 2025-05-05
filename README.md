@@ -20,7 +20,7 @@ This project has been the foundation of two research papers:
 
 1. **"Now I Know What I am Eating: Real-time Tracking and Nutritional Insights Using VietFood67 to Enhance User Experience"**  
    🏆 *Best Paper Runner-up Award at SOICT 2024*  
-   🔗 [View Paper](https://drive.google.com/file/d/19FcdIjc2kdT4ocdUMtztcZSqOx39qTUe/view)
+   🔗 [View Paper](https://link.springer.com/chapter/10.1007/978-981-96-4288-5_35)
    
 2. **"It’s Yummy: Real-Time Detection and Recognition of Vietnamese Dishes"**  
    📌 *Presented at ICCIT 2024, British University Vietnam (BUV)*  
