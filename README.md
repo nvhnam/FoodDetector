@@ -16,7 +16,7 @@
 
 ## 📚 Publications
 
-This project has been the foundation of two research papers:
+This project has been the foundation of two published research papers:
 
 1. **"Now I Know What I am Eating: Real-time Tracking and Nutritional Insights Using VietFood67 to Enhance User Experience"**  
    🏆 *Best Paper Runner-up Award at SOICT 2024*  
@@ -24,7 +24,7 @@ This project has been the foundation of two research papers:
    
 2. **"It’s Yummy: Real-Time Detection and Recognition of Vietnamese Dishes"**  
    📌 *Presented at ICCIT 2024, British University Vietnam (BUV)*  
-   🔗 [View Paper](https://drive.google.com/file/d/15oVhSYscpNW5pSEFjiXLNHrGNyDi6vjt/view) 
+   🔗 [View Paper](https://www.igi-global.com/gateway/chapter/380134) 
 
 ---
 
