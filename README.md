@@ -119,4 +119,5 @@ streamlit run app.py
 For questions or collaborations:
 
 - 📧 Email: nvhnam01@gmail.com
+- 👨‍💻 Portfolio: https://nguyenviethoangnam.vercel.app/
 - 📝 LinkedIn: https://www.linkedin.com/in/nvhnam01/
